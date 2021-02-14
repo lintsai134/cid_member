@@ -1,0 +1,363 @@
+<?php
+use XoopsModules\Tadtools\TadMod;
+$TadMod = new TadMod(basename(__DIR__));
+// $TadMod->add_menu('前台選項', 'index.php?op=create', true);
+
+//新增資料
+function create()
+{
+	$get_mb = $_GET['mb_sn'];
+	
+	$main="
+		新增{$get_mb}資料
+	";	
+	echo $main;
+}
+
+//修改資料
+function edit()
+{
+	$get_mb = $_GET['mb_sn'];
+
+	$main="
+		修改{$get_mb}資料
+	";	
+	echo $main;
+}
+
+//刪除資料
+function del()
+{
+	$get_mb = $_GET['mb_sn'];
+
+	$main="
+		刪除{$get_mb}資料
+	";	
+	echo $main;
+}
+
+//列表--顯示預設頁面內容
+function show_content($located)
+{
+    global $xoopsDB, $xoopsTpl, $isAdmin,$xoopsModule,$isAdminMember,$xoopsModuleConfig,$xoopsUser;
+	
+	$DIRNAME=$xoopsModule->getVar('dirname');
+	$and_key="";
+	$get_cate = $_GET['cate_sn'];
+	//搜尋
+	if(isset($_GET['member_key'])){
+	  $member_key=SqlFilter($_GET['member_key'],"trim,addslashes,strip_tags");
+	  $and_key=empty($member_key)?"":" where com like '%{$member_key}%' or name like '%{$member_key}%' or location like '%{$member_key}%' or phone like '%{$member_key}%' or mobile like '%{$member_key}%' or fax like '%{$member_key}%' or url like '%{$member_key}%' or memo like '%{$member_key}%'";
+	}
+
+	if($get_cate==0 or !empty($and_key)){
+		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$and_key}";
+	  }else{
+		$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn`= '$get_cate'";
+	  } 
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	
+	$cate = get_cate_array();//讀取類別
+
+  if($xoopsUser){//管理員使用
+	if($xoopsUser->isAdmin ()){
+	$admin= "
+	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?op=create'>
+	【新增】
+	</a>
+	</div>
+	<div style='background-color:#fff; clear:left;'>
+	</div>
+	";
+	}}
+	
+//echo $_GET['cate_sn'];
+	$selected=($cate_sn==0)?" selected=selected":"";
+	$stop_level=1;
+	$select_cate_sn="
+	<select name='cate_sn' size=1 onChange='location.href=\"{$_SERVER['PHP_SELF']}?cate_sn=\"+this.value'>
+		<option value='0' {$selected}> 全部 </option>".get_cate_option($get_cate,$stop_level,$level)."
+	</select> 
+	";
+	$search_all="
+	<div id='ugm_member_search'>
+		<form method='get' action='{$form_action}'>
+			<input type='text' name='member_key'  size='10' value='' />
+			<input type='hidden' name='op' value='search' />
+			<input type='submit' value='會員搜尋' />
+		</form>
+	</div>
+	";
+
+    $i = 1;
+//	die($post_n);
+ 	$main.="
+	<table border='0' cellspacing='0' cellpadding='0' >
+	<tr>
+	<td>{$select_cate_sn}</td>
+	<td>{$admin}</td>
+	<td align='right'>{$search_all}</td>
+	</tr>
+	</table>
+	<table border='1' cellspacing='0' cellpadding='0' >
+		<tr>
+			<td bgcolor='#ffff00' width=7%>
+			<center>序號</center>
+			</td>
+			<td bgcolor='#ffff00' width=10%>
+			類別
+			</td>
+			<td bgcolor='#ffff00' width=45%>
+			名稱
+			</td>
+			<td bgcolor='#ffff00' width=14%>
+			姓名
+			</td>
+			<td bgcolor='#ffff00' width=14%>
+			電話
+			</td>";
+	if($located==0){//如果是後台才執行，前台為1
+		$main.="
+			<td bgcolor='#ffff00'>
+			手機
+			</td>
+			<td bgcolor='#ffff00'>
+			傳真
+			</td>
+			<td bgcolor='#ffff00'>
+			電郵
+			</td>
+			<td bgcolor='#ffff00'>
+			網站
+			</td>
+			<td bgcolor='#ffff00'>
+			簡介
+			</td>
+		
+		";
+	}
+ 	$main.="
+
+		</tr>
+	";
+    while (false !== ($all = $xoopsDB->fetchArray($result))) {
+        //以下會產生這些變數： $mb_sn ,$cate_sn ,$com ,$name ,$mobile ,$phone ,$fax ,$email ,$url ,$location ,last_update ,$memo 
+
+        foreach ($all as $k => $v) {
+            $$k = $v;
+        }
+	if($i%2==0){
+		$color_n="#ECECFF";
+	}else{
+		$color_n="#FFE6D9";
+	}
+	$cate_name = $cate[$cate_sn];
+	$module_name=$xoopsModule->getVar('dirname');
+	
+	if($mobile==''){$mobile_y='';}else{$mobile_y='Yes';}
+	if($fax==''){$fax_y='';}else{$fax_y='Yes';}
+	if($email==''){$email_y='';}else{$email_y="<img src='/modules/$module_name/images/email.png'>";}
+	if($url==''){$url_y='';}else{$url_y="<img src='/modules/$module_name/images/url.png' >";}
+	if($memo==''){$memo_y='';}else{$memo_y='Yes';}
+	
+	$main.="
+		<tr style='background-color:$color_n;'>
+			<td style='background-color:$color_n;'>
+			<center> $i </center>
+			</td>
+			<td>
+			{$cate_name}
+			</td>
+			<td>
+		<a href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'>
+			{$com}
+		</a>
+			</td>
+			<td>
+			{$name}
+			</td>
+			<td>
+			{$phone}
+			</td>";
+	if($located==0){//如果是後台才執行，前台為1
+		$main.="
+			<td>{$mobile_y}
+			</td>
+			<td>{$fax_y}
+			</td>
+			<td>{$email_y}
+			</td>
+			<td><a href={$url} target='blank'>{$url_y}</a>
+			</td>
+			<td>{$memo_y}
+			</td>
+		
+		
+		";
+	}
+ 	$main.="
+		</tr>
+";
+		$i++;
+	}
+	$main.="
+	</table>";
+	
+//    $xoopsTpl->assign('content', $main);
+echo $main;
+}
+
+//秀出單一個別資料
+function show(){
+	global $xoopsDB,$xoopsModule,$xoopsUser;
+	$DIRNAME=$xoopsModule->getVar('dirname');
+	$mb_sn = $_GET['mb_sn'];
+	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `mb_sn`='$mb_sn'";
+	//以下會產生這些變數： $mb_sn ,$cate_sn ,$com ,$name ,$mobile ,$phone ,$fax ,$email ,$url ,$location ,last_update ,$memo 
+
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	$all=$xoopsDB->fetchArray($result);
+
+	foreach($all as $k=>$v){
+	  $$k=$v;
+	}
+	$memo=nl2br($memo);
+	$cate = get_cate_array();//讀取類別
+	$cate_name = $cate[$cate_sn];
+
+  if($xoopsUser){//管理員使用
+	if($xoopsUser->isAdmin ()){
+	$admin= "
+	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?op=create'>
+	【新增】
+	</a>
+	</div>
+	<div style='border-color:#FFF; border-style:solid; background-color:#FFAF60; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?op=edit&mb_sn={$mb_sn}''>
+	【修改】
+	</a>
+	</div>
+	<div style='border-color:#FFF; border-style:solid; background-color:#1AFD9C; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}''>
+	【刪除】
+	</a>
+	</div>
+	";
+	}}
+
+	$main.="
+	{$admin}
+	<div style='border-color:#FFF; border-style:solid; background-color:#FFE66F; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?cate_sn={$cate_sn}'>【列表】</a>
+	</div>
+	<div style='background-color:#fff; clear:left;'>
+	</div>
+	<div style='background-color:#000;color:yellow;'>
+		【{$cate_name}】
+		<span style='color:#fff; font-weight:bold;'>{$com}</span>
+	</div>
+	<div style=''>
+	姓名：{$name}<br>
+	行動：{$mobile}<br>
+	電話：{$phone}<br>
+	傳真：{$fax}<br>
+	信箱：<a href='mailto:{$email}'>{$email}</a><br>
+	地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$location}' target=_blank title='連結google地圖'>{$location}</a><br>
+	網址：<a href={$url} target='blank'>{$url}</a>
+	</div>
+	<div style='background-color:#006000;'>
+		<span style='color:#fff; font-weight:bold;'>會員簡介</span>
+	</div>
+	<div><p>{$memo}</p>
+	</div>
+<!--先隱藏
+	<div style='background-color:#2F0000;'>
+		<span style='color:#fff; font-weight:bold;'>作品簡介</span>
+	</div>
+	<div>【作品暫時隱藏】		
+	</div>
+-->	
+	";
+	echo $main;
+}
+
+//取得類別名稱陣列
+function get_cate_array()
+{
+    global $xoopsDB;
+    $sql = 'select cate_sn,cate_title from ' . $xoopsDB->prefix('lin_mb_cate') . '';
+    $result = $xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+    while (list($cate_sn, $cate_title) = $xoopsDB->fetchRow($result)) {
+        $arr[$cate_sn] = $cate_title;
+    }
+
+    return $arr;
+}
+
+#-- 取得選單選項get_menu_option
+function get_cate_option($cate_sn_chk=0,$stop_level=1,$level=0){
+  global $xoopsDB;
+  
+  if($level>=$stop_level)return;
+  $level++;
+  
+  $sql = "select `cate_sn`,`cate_title` from ".$xoopsDB->prefix("lin_mb_cate")."  order by `cate_sn`";
+  
+  $result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+  $i=1;
+  $level_mark="";
+  while ($level-$i>0){
+    $level_mark.="&nbsp;&nbsp;&nbsp;";
+    $i++;
+  }
+  while($all=$xoopsDB->fetchArray($result) ){
+  //以下會產生這些變數： 【$msn,$title】
+    foreach($all as $k=>$v){
+      $$k=$v;
+    }
+    $selected=($cate_sn==$cate_sn_chk)?" selected=selected":"";
+    $main.="<option value={$cate_sn}{$selected}>{$level_mark}{$cate_title}</option>";
+    //$main.=$head_text.$class_sn.$selected.$body_text.$class_name.$foot_text;
+    $main.=get_cate_option($cate_sn_chk,$stop_level,$level);
+//echo $cate_sn;	
+  }
+  return $main;
+}
+
+###############################################################################
+#  資料過瀘
+#
+#  SqlFilter($Variable='',"trim,addslashes,strip_tags,htmlspecialchars,intval")
+###############################################################################
+function SqlFilter($Variable='',$method='text'){
+  if(empty($Variable))return '';
+  $methods = explode(",", $method);
+  foreach($methods as $method){
+    switch($method){
+  	//去除前後空白
+    case "trim":
+  	  $Variable=trim($Variable);
+  	break;
+  	//特殊字符轉義
+  	case "addslashes":
+  	  $Variable=(! get_magic_quotes_gpc()) ? addslashes($Variable) : $Variable;
+  	break;
+  	//去除html、php標籤
+  	case "strip_tags":
+  	  $Variable=strip_tags($Variable);
+  	break;
+  	//轉換特殊字元成為HTML實體
+  	case "htmlspecialchars":
+  	  $Variable=htmlspecialchars($Variable);
+  	break;
+    case "intval":
+  	  $Variable=intval($Variable); 
+  	break;
+  	default:
+  	break;
+    }
+  }
+  return  $Variable ;
+}

@@ -66,14 +66,14 @@ function show_content($located)
 	//搜尋
 	if(isset($_GET['member_key'])){
 	  $member_key=SqlFilter($_GET['member_key'],"trim,addslashes,strip_tags");
-	  $and_key=empty($member_key)?"":" where com like '%{$member_key}%' or name like '%{$member_key}%' or location like '%{$member_key}%' or phone like '%{$member_key}%' or mobile like '%{$member_key}%' or fax like '%{$member_key}%' or url like '%{$member_key}%' or memo like '%{$member_key}%'";
+	  $and_key=empty($member_key)?"":" where mb_com like '%{$member_key}%' or mb_name like '%{$member_key}%' or mb_location like '%{$member_key}%' or mb_phone like '%{$member_key}%' or mb_mobile like '%{$member_key}%' or mb_fax like '%{$member_key}%' or mb_url like '%{$member_key}%' or mb_memo like '%{$member_key}%'";
 	  }
 	if($url_no == ''){
 		$url_key="";
 	}elseif($url_no == 1){
-		$url_key=" where not`url`= ''";
+		$url_key=" where not`mb_url`= ''";
 	}elseif($url_no == 2){
-		$url_key=" where `url`= ''";
+		$url_key=" where `mb_url`= ''";
 	}else{
 		$url_key="";
 	}
@@ -210,7 +210,7 @@ function show_content($located)
 		</tr>
 	";
     while (false !== ($all = $xoopsDB->fetchArray($result))) {
-        //以下會產生這些變數： $mb_sn ,$cate_sn ,$com ,$name ,$mobile ,$phone ,$fax ,$email ,$url ,$location ,last_update ,$memo 
+        //以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
 
         foreach ($all as $k => $v) {
             $$k = $v;
@@ -223,11 +223,11 @@ function show_content($located)
 	$cate_name = $cate[$cate_sn];
 	$module_name=$xoopsModule->getVar('dirname');
 	
-	if($mobile==''){$mobile_y='';}else{$mobile_y='Yes';}
-	if($fax==''){$fax_y='';}else{$fax_y='Yes';}
-	if($email==''){$email_y="<img src='/modules/$module_name/images/noemail.png'>";}else{$email_y="<img src='/modules/$module_name/images/email.png' title='$email'>";}
-	if($url==''){$url_y='';}else{$url_y="<img src='/modules/$module_name/images/url.png' title='$url'>";}
-	if($memo==''){$memo_y='';}else{$memo_y='Yes';}
+	if($mb_mobile==''){$mobile_y='';}else{$mobile_y='Yes';}
+	if($mb_fax==''){$fax_y='';}else{$fax_y='Yes';}
+	if($mb_email==''){$email_y="<img src='/modules/$module_name/images/noemail.png'>";}else{$email_y="<img src='/modules/$module_name/images/email.png' title='$email'>";}
+	if($mb_url==''){$url_y='';}else{$url_y="<img src='/modules/$module_name/images/url.png' title='$url'>";}
+	if($mb_memo==''){$memo_y='';}else{$memo_y='Yes';}
 	
 	$main.="
 		<tr style='background-color:$color_n;'>
@@ -239,14 +239,14 @@ function show_content($located)
 			</td>
 			<td>
 		<a href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'>
-			{$com}
+			{$mb_com}
 		</a>
 			</td>
 			<td>
-			{$name}
+			{$mb_name}
 			</td>
 			<td>
-			{$phone}
+			{$mb_phone}
 			</td>";
 	if($located==1){//如果是後台才執行，前台為2
 		$main.="
@@ -256,7 +256,7 @@ function show_content($located)
 			</td>
 			<td>{$email_y}
 			</td>
-			<td><a href={$url} target='blank'>{$url_y}</a>
+			<td><a href={$mb_url} target='blank'>{$url_y}</a>
 			</td>
 			<td>{$memo_y}
 			</td>
@@ -282,7 +282,7 @@ function show(){
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	$mb_sn = $_GET['mb_sn'];
 	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `mb_sn`='$mb_sn'";
-	//以下會產生這些變數： $mb_sn ,$cate_sn ,$com ,$name ,$mobile ,$phone ,$fax ,$email ,$url ,$location ,last_update ,$memo 
+	//以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
 
 	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
 	$all=$xoopsDB->fetchArray($result);
@@ -290,7 +290,7 @@ function show(){
 	foreach($all as $k=>$v){
 	  $$k=$v;
 	}
-	$memo=nl2br($memo);
+	$mb_memo=nl2br($mb_memo);
 	$cate = get_cate_array();//讀取類別
 	$cate_name = $cate[$cate_sn];
 
@@ -324,21 +324,21 @@ function show(){
 	</div>
 	<div style='background-color:#000;color:yellow;'>
 		【{$cate_name}】
-		<span style='color:#fff; font-weight:bold;'>{$com}</span>
+		<span style='color:#fff; font-weight:bold;'>{$mb_com}</span>
 	</div>
 	<div style=''>
-	姓名：{$name}<br>
-	行動：{$mobile}<br>
-	電話：{$phone}<br>
-	傳真：{$fax}<br>
-	信箱：<a href='mailto:{$email}'>{$email}</a><br>
-	地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$location}' target=_blank title='連結google地圖'>{$location}</a><br>
-	網址：<a href={$url} target='blank'>{$url}</a>
+	姓名：{$mb_name}<br>
+	行動：{$mb_mobile}<br>
+	電話：{$mb_phone}<br>
+	傳真：{$mb_fax}<br>
+	信箱：<a href='mailto:{$mb_email}'>{$mb_email}</a><br>
+	地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$mb_location}' target=_blank title='連結google地圖'>{$mb_location}</a><br>
+	網址：<a href={$mb_url} target='blank'>{$mb_url}</a>
 	</div>
 	<div style='background-color:#006000;'>
 		<span style='color:#fff; font-weight:bold;'>會員簡介</span>
 	</div>
-	<div><p>{$memo}</p>
+	<div><p>{$mb_memo}</p>
 	</div>
 <!--先隱藏
 	<div style='background-color:#2F0000;'>

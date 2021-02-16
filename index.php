@@ -38,7 +38,7 @@ switch ($op) {
 
 
     default://列表--(程式在function.php)
-        show_content($located=1);
+        show_content($located=2);
         break;
 }
 

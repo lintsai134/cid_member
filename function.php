@@ -44,36 +44,44 @@ function show_content($located)
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	$and_key="";
 	$get_cate = $_GET['cate_sn'];
-	if($_GET['url_no']==2){//網站判斷
-		$url_no = 1;
-		$url_ta =  '搜尋有';
-		$url_tl =  '目前為搜尋無網站會員';
-	}elseif($_GET['url_no']==1){
-		$url_no = 2;
-		$url_ta =  '搜尋無';
-		$url_tl =  '目前為搜尋有網站會員';
-	}else{
-		$url_no = 1;
-		$url_ta =  '搜尋有';
-		$url_tl =  '目前為全部會員';
-	}
+
+	//網站判斷
+		if($_GET['url_no']==0){
+			$url_no = 0;
+			$url_bg0 = '#B9B973';
+			$url_bg1=$url_bg2 = '#FFF';
+			//$url_tl =  '目前無查詢是否有網站，按此搜尋有網站會員';
+		}elseif($_GET['url_no']==1){
+			$url_no = 1;
+			$url_bg1 = '#B9B973';
+			$url_bg0=$url_bg2 = '#FFF';
+			//$url_tl =  '目前顯示為有網站會員，按此搜尋無網站會員';
+		}else{//($_GET['url_no']==2)
+			$url_no = 2;
+			$url_bg2 = '#B9B973';
+			$url_bg1=$url_bg0 = '#FFF';
+			//$url_tl =  '目前顯示為無網站會員，按此無查詢是否有網站';
+		}
 	
 	//搜尋
 	if(isset($_GET['member_key'])){
 	  $member_key=SqlFilter($_GET['member_key'],"trim,addslashes,strip_tags");
-	  $and_key=empty($member_key)?"":" and com like '%{$member_key}%' or name like '%{$member_key}%' or location like '%{$member_key}%' or phone like '%{$member_key}%' or mobile like '%{$member_key}%' or fax like '%{$member_key}%' or url like '%{$member_key}%' or memo like '%{$member_key}%'";
-	}
+	  $and_key=empty($member_key)?"":" where com like '%{$member_key}%' or name like '%{$member_key}%' or location like '%{$member_key}%' or phone like '%{$member_key}%' or mobile like '%{$member_key}%' or fax like '%{$member_key}%' or url like '%{$member_key}%' or memo like '%{$member_key}%'";
+	  }
 	if($url_no == ''){
 		$url_key="";
 	}elseif($url_no == 1){
+		$url_key=" where not`url`= ''";
+	}elseif($url_no == 2){
 		$url_key=" where `url`= ''";
 	}else{
-		$url_key=" where not`url`= ''";
+		$url_key="";
 	}
+//die("是否有來這邊{$url_key}！");
 
 	if($get_cate==0 or !empty($and_key)){
-		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$url_key}{$and_key}";
-	  }elseif($url_no==1){
+		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$and_key}";
+	  }elseif($url_no==1 and $get_cate==''){
 		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$url_key}";
 	  }else{
 		$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn`= '$get_cate'";
@@ -86,19 +94,31 @@ function show_content($located)
 	if($xoopsUser->isAdmin ()){
 	$admin= "
 	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=create'>
+	<a href='{$_SERVER['PHP_SELF']}?op=insert_lin_member'>
 	【新增】
 	</a>
-	</div>
-	<div style='border-color:#FFF; border-style:solid; background-color:#AAAAFF; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?url_no=$url_no' title=$url_tl>
-	【{$url_ta}網站】
-	</a>
-	
 	</div>
 	<div style='background-color:#fff; clear:left;'>
 	</div>
 	
+	";
+	$url_button="
+	<div style='border-color:#000; border-style:solid; background-color:{$url_bg0}; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?url_no=0' title=$url_tl>
+	【無查詢】
+	</a>
+	</div>
+	<div style='border-color:#000; border-style:solid; background-color:{$url_bg1}; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?url_no=1' title=$url_tl>
+	【有網站】
+	</a>
+	</div>
+	<div style='border-color:#000; border-style:solid; background-color:{$url_bg2}; border-bottom:1 solid #000000; float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?url_no=2' title=$url_tl>
+	【無網站】
+	</a>
+	</div>
+
 	";
 	}}
 	
@@ -120,13 +140,31 @@ function show_content($located)
 	</div>
 	";
 
+//後台：$located==1；前台：located==2
+//是否可以區分在前後台顯示，$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：9)}
+	$url_locat=1;//<--修改此數值，可控制查詢網站【按鈕】於前後台顯示、隱藏
+	//$data_locat=1;
+	
     $i = 1;
 //	die($post_n);
  	$main.="
 	<table border='0' cellspacing='0' cellpadding='0' >
 	<tr>
 	<td>{$select_cate_sn}</td>
-	<td>{$admin}</td>
+	<td>
+	";
+//查詢網站判斷
+	if($url_locat==1){//$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：)}
+		if($located==1){$main.="{$url_button}";}
+	}elseif($url_locat==2){
+		if($located==2){$main.="{$url_button}";}
+	}elseif($url_locat==0){
+		if($located==1 or $located==2){$main.="{$url_button}";}
+	}else{
+		if($located==1 and $located==2){$main.="{$url_button}";}
+	}
+ 	$main.="
+	{$admin}</td>
 	<td align='right'>{$search_all}</td>
 	</tr>
 	</table>
@@ -147,7 +185,7 @@ function show_content($located)
 			<td bgcolor='#ffff00' width=14%>
 			電話
 			</td>";
-	if($located==0){//如果是後台才執行，前台為1
+	if($located==1){//如果是後台才執行，前台為2
 		$main.="
 			<td bgcolor='#ffff00'>
 			手機
@@ -210,7 +248,7 @@ function show_content($located)
 			<td>
 			{$phone}
 			</td>";
-	if($located==0){//如果是後台才執行，前台為1
+	if($located==1){//如果是後台才執行，前台為2
 		$main.="
 			<td>{$mobile_y}
 			</td>
@@ -260,12 +298,12 @@ function show(){
 	if($xoopsUser->isAdmin ()){
 	$admin= "
 	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=create'>
+	<a href='{$_SERVER['PHP_SELF']}?op=insert_lin_member'>
 	【新增】
 	</a>
 	</div>
 	<div style='border-color:#FFF; border-style:solid; background-color:#FFAF60; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=edit&mb_sn={$mb_sn}''>
+	<a href='{$_SERVER['PHP_SELF']}?op=update_lin_member&mb_sn={$mb_sn}''>
 	【修改】
 	</a>
 	</div>
@@ -324,6 +362,21 @@ function get_cate_array()
     }
 
     return $arr;
+}
+
+//以流水號取得某筆lin_member資料
+function get_lin_member($mb_sn = '')
+{
+    global $xoopsDB;
+    if (empty($mb_sn)) {
+        return;
+    }
+
+    $sql = 'select * from `' . $xoopsDB->prefix('lin_member') . "` where `mb_sn` = '{$mb_sn}'";
+    $result = $xoopsDB->query($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+    $data = $xoopsDB->fetchArray($result);
+
+    return $data;
 }
 
 #-- 取得選單選項get_menu_option

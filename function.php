@@ -523,13 +523,16 @@ function show($located){
 		<a href='/modules/member/admin/main.php?op=lin_member_form&mb_sn={$mb_sn}' class='btn btn-warning'>【編輯】</a>
 		</div>
 		<div style='float:left;'>
-		<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}' class='del_button btn btn-danger'>【刪除】</a>
+		<a href='javascript:delete_action({$mb_sn})' class='btn btn-danger btn-xs'>【刪除】</a>
 		</div>
 		";
 		}}
 /*	<a href='javascript:delete_member_func({$mb_sn})' class='btn btn-danger'>
+	<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}' class='del_button btn btn-danger'>
 	【刪除】
 	</a>
+	<a href="javascript:delete_action({$action.action_id})" class="btn btn-danger btn-xs">刪除</a>
+	
 */
 	$main.=show_locat(0,$located,$admin)."
 	<div style='float:left;'>
@@ -568,31 +571,27 @@ function show($located){
 
 //	<--! sweetalert彈出操作框套件JS部分-->
 	$main.="
-	$xoopsurl=XOOPS_URL;
-	<script>var xoopsjsurl='{$xoopsurl}';</script> //傳入Xoops路徑
-	<script>
-	document.getElementById('del_button').addEventListener('click',function(){
-	  swal({
-		title: '您確定要刪除嗎？',
-		icon: 'warning',
-		buttons: {
-		  Btn: false,
-		  cancel: {
-			text: '取消',
-			visible: true
-		  },
-		  confirm: {
-			text: 'Confirm',
-			visible: true
-		  },
-		  danger: {
-			text: 'Danger',
-			visible: true
-		  }
-		}
-	  });
-	});	
-	</script>	
+	<script type='text/javascript' src='class/sweet-alert/sweetalert.min.js'></script>
+	<link rel='stylesheet' type='text/css' href='class/sweet-alert/sweetalert.css' />
+	<script type='text/javascript'>
+	  function delete_action(id){
+		swal({
+		  title: '確定要刪除嗎？',
+		  text: '刪除後資料就消失救不回來囉！',
+		  type: 'warning',
+		  showCancelButton: true,
+		  confirmButtonColor: '#DD6B55',
+		  confirmButtonText: '是！含淚刪除！',
+		  cancelButtonText: '不...別刪',
+		  closeOnConfirm: false
+		}, function(){
+		  swal('OK！刪掉惹！', '該資料已經隨風而逝了...', 'success');
+
+		  location.href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}';
+		});
+	  }
+	</script>
+
 	";
 	echo $main;
 }
@@ -602,38 +601,16 @@ function delete_lin_member()
 {
 	global $xoopsDB;
 	$mb_sn = $_GET['mb_sn'];
-//die("<button id='demo1'>Demo {$mb_sn}</button>");
     if (empty($mb_sn)) {
         return;
     }
+//die("<button id='demo1'>Demo {$mb_sn}</button>");
 	$main = "
+	$sql = 'delete from `' . $xoopsDB->prefix('lin_member') . "` where `mb_sn` = '{$mb_sn}'";
+	$xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
 
-	<script>
-	sweetAlert('哎呦……', '出错了！','error');
-	  swal({
-		title: '您確定要刪除嗎？',
-		icon: 'warning',
-		buttons: {
-		  Btn: false,
-		  cancel: {
-			text: '取消',
-			visible: true
-		  },
-		  confirm: {
-			text: 'Confirm',
-			visible: true
-		  },
-		  danger: {
-			text: 'Danger',
-			visible: true
-		  }
-		}
-	  });
-	</script>	
 	";
 	echo $main;
-//	$sql = 'delete from `' . $xoopsDB->prefix('lin_member') . "` where `mb_sn` = '{$mb_sn}'";
-//	$xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
 }
 
 //刪除資料

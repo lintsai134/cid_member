@@ -1,12 +1,13 @@
 <?php
 /*-----------引入檔案區--------------*/
-include_once "header.php";
 $xoopsOption['template_main'] = "index.tpl";
+include_once "header.php";
 include_once XOOPS_ROOT_PATH . "/header.php";
 include_once XOOPS_ROOT_PATH . "/function.php";
 
-/*-----------function區--------------*/
 
+
+/*-----------function區--------------*/
 
 
 /*-----------執行動作判斷區----------*/
@@ -16,26 +17,9 @@ $op = system_CleanVars($_REQUEST, 'op', '', 'string');
 
 switch ($op) {
 
-    // case "xxx":
-    // xxx();
-    // header("location:{$_SERVER['PHP_SELF']}");
-    // exit;
-    case "create"://新增資料--(程式在function.php)
-        create();
-        break;
-
-    case "edit"://修改資料--(程式在function.php)
-        edit();
-        break;
-
-    case "delete"://刪除資料--(程式在function.php)
-        del();
-        break;
-
     case "show"://秀出結果區--(程式在function.php)
-        show();
+        show($located=2);
         break;
-
 
     default://列表--(程式在function.php)
         show_content($located=2);

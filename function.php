@@ -1,39 +1,249 @@
 <?php
+use XoopsModules\Tadtools\TreeTable;
+use XoopsModules\Tadtools\Utility;
 use XoopsModules\Tadtools\TadMod;
+
+use XoopsModules\Tadtools\FancyBox;
+use XoopsModules\Tadtools\FormValidator;
+use XoopsModules\Tadtools\SweetAlert;
+
+include_once XOOPS_ROOT_PATH . "/modules/tadtools/tad_function.php";//載入tadtools/tad_function.php
+
 $TadMod = new TadMod(basename(__DIR__));
 // $TadMod->add_menu('前台選項', 'index.php?op=create', true);
 
-//新增資料
-function create()
+function lin_member_form($mb_sn = '')
 {
-	$get_mb = $_GET['mb_sn'];
+    global $xoopsDB, $xoopsTpl, $xoopsUser;
+    include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+	//套用formValidator驗證機制
+	if(!file_exists(TADTOOLS_PATH."/formValidator.php")){
+	  redirect_header("main.php", 3, _TAD_NEED_TADTOOLS);
+	}
+	include_once TADTOOLS_PATH."/formValidator.php";
+	$formValidator      = new formValidator("#myForm", true);
+	$formValidator_code = $formValidator->render();
+	$xoopsTpl->assign("formValidator_code",$formValidator_code);	
 	
-	$main="
-		新增{$get_mb}資料
-	";	
+    //include_once(XOOPS_ROOT_PATH."/class/xoopseditor/xoopseditor.php");
+	$mb_sn = $_GET['mb_sn'];
+    //抓取預設值
+    if (!empty($mb_sn)) {
+        $DBV = get_lin_member($mb_sn);
+    } else {
+        $DBV = [];
+    }
+
+    //預設值設定
+
+    //設定「mb_sn」欄位預設值
+    $mb_sn = !isset($DBV['mb_sn']) ? $mb_sn : $DBV['mb_sn'];
+    //$xoopsTpl->assign('mb_sn', $mb_sn);
+
+    //設定「cate_sn」欄位預設值
+    $cate_sn = !isset($DBV['cate_sn']) ? $cate_sn : $DBV['cate_sn'];
+    //$xoopsTpl->assign('cate_sn', $cate_sn);
+
+    //設定「mb_com」欄位預設值
+    $mb_com = !isset($DBV['mb_com']) ? $mb_com : $DBV['mb_com'];
+    //$xoopsTpl->assign('mb_com', $mb_com);
+
+    //設定「mb_name」欄位預設值
+    $mb_name = !isset($DBV['mb_name']) ? $mb_name : $DBV['mb_name'];
+    //$xoopsTpl->assign('mb_name', $mb_name);
+
+    //設定「mb_mobile」欄位預設值
+    $mb_mobile = !isset($DBV['mb_mobile']) ? $mb_mobile : $DBV['mb_mobile'];
+    //$xoopsTpl->assign('mb_mobile', $mb_mobile);
+
+    //設定「mb_phone」欄位預設值
+    $mb_phone = !isset($DBV['mb_phone']) ? $mb_phone : $DBV['mb_phone'];
+    //$xoopsTpl->assign('mb_phone', $mb_phone);
+
+    //設定「mb_fax」欄位預設值
+    $mb_fax = !isset($DBV['mb_fax']) ? $mb_fax : $DBV['mb_fax'];
+    //$xoopsTpl->assign('mb_fax', $mb_fax);
+
+    //設定「mb_email」欄位預設值
+    $mb_email = !isset($DBV['mb_email']) ? $mb_email : $DBV['mb_email'];
+    //$xoopsTpl->assign('mb_email', $mb_email);
+
+    //設定「mb_url」欄位預設值
+    $mb_url = !isset($DBV['mb_url']) ? $mb_url : $DBV['mb_url'];
+    //$xoopsTpl->assign('mb_url', $mb_url);
+
+    //設定「mb_location」欄位預設值
+    $mb_location = !isset($DBV['mb_location']) ? $mb_location : $DBV['mb_location'];
+    //$xoopsTpl->assign('mb_location', $mb_location);
+
+    //設定「uid」欄位預設值
+    $user_uid = ($xoopsUser) ? $xoopsUser->uid() : '';
+    $uid = (!isset($DBV['uid'])) ? $user_uid : $DBV['uid'];
+    //$xoopsTpl->assign('mb_uid', $mb_uid);
+
+    //設定「mb_last_update」欄位預設值
+    $mb_last_update = !isset($DBV['mb_last_update']) ? date('Y-m-d H:i:s') : $DBV['mb_last_update'];
+    //$xoopsTpl->assign('mb_last_update', $mb_last_update);
+
+    //設定「mb_memo」欄位預設值
+    $mb_memo = !isset($DBV['mb_memo']) ? $mb_memo : $DBV['mb_memo'];
+    //$xoopsTpl->assign('mb_memo', $mb_memo);
+
+    $op = (empty($mb_sn)) ? 'insert_lin_member' : 'update_lin_member';
+    //$op="replace_lin_member";
+
+/*	$FormValidator = new FormValidator('#myForm', true);
+	$FormValidator->render();
+//die("取得：{$mb_sn}有嗎？");
+
+    //評鑑說明
+    $ck = new CkEditor('lin_member', 'mb_name', $mb_name);
+    $ck->setHeight(100);
+    $editor = $ck->render();
+*/
+
+//會員類別選擇(如果讓【會員】自行變更內容，這個項目要設定隱藏)
+	$selected=($cate_sn==0)?" selected=selected":"";
+	$stop_level=1;
+	$select_cate_sn="
+	類別：<select name='cate_sn' size=1>
+		".get_cate_option($cate_sn,1,0)."
+	</select> 
+	";
+	if(empty($mb_sn)){
+		$Form_title="<div class='btn btn-success disabled btn-block'>【新增會員資料】</div>";
+	}else{
+		$Form_title="<div class='btn btn-success disabled btn-block'>【編輯會員資料】</div>";
+	}
+
+	$main = "
+	<div style='margin:0em 4em; '>
+	<form action='?op=show&mb_sn={$mb_sn}' method='post' id='myForm' enctype='multipart/form-data'>
+		<div style='width:100%; color: #2F0000; font-size:0.5cm; background-color:#FFF8D7; text-shadow: 0.1em 0.1em 0.2em black'>
+		$Form_title<p>
+		$select_cate_sn<p>
+		名稱：<input type='text' name='mb_com' size='25' value='{$mb_com}' id='mb_com' class='validate[required , min[1], max[100]]'><p>
+		姓名：<input type='text' name='mb_name' size='10' value='{$mb_name}' id='mb_name' class='validate[required , min[1], max[50]]'><p>
+		行動：<input type='text' name='mb_mobile' size='20' value='{$mb_mobile}' id='mb_mobile' ><p>
+		電話：<input type='text' name='mb_phone' size='20' value='{$mb_phone}' id='mb_phone' ><p>
+		傳真：<input type='text' name='mb_fax' size='20' value='{$mb_fax}' id='mb_fax' ><p>
+		信箱：<input type='text' name='mb_email' size='25' value='{$mb_email}' id='mb_email' ><p>
+		地址：<input type='text' name='mb_location' size='25' value='{$mb_location}' id='mb_location' ><p>
+		網址：<input type='text' name='mb_url' size='25' value='{$mb_url}' id='mb_url' '><p>
+		<div class='btn btn-success disabled btn-block'>會員簡介</div>
+		<div >
+		<textarea name='mb_memo' style='width:100%;height:300px; font-size:0.5cm;' id='mb_memo'>{$mb_memo}</textarea>
+		</div>
+		</div>
+	<tr><th colspan='2'>
+	<input type='hidden' name='op' value='{$op}'>
+	<input type='hidden' name='uid' value='{$uid}'>
+	<input type='hidden' name='mb_sn' value='{$mb_sn}'>
+	<center>
+		<input class='btn btn-warning' type='submit' value='存檔' />
+		<input class='btn btn-default' type='button' onclick=\"window.location.replace('?op=show&mb_sn={$mb_sn}')\" value='取消' /> 
+	</center>
+	</th></tr>
+	</form>
+	</div>";
+		
+//以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
+
+//	$main=ugm_div($Form_title,$main,"shadow");
+//die("值：".$mb_sn."，姓名：".$mb_name);
 	echo $main;
 }
 
-//修改資料
-function edit()
+//新增資料到lin_member中
+function insert_lin_member()
 {
-	$get_mb = $_GET['mb_sn'];
+    global $xoopsDB, $xoopsUser, $xoopsModuleConfig;
+    //取得最後新增資料的流水編號
 
-	$main="
-		修改{$get_mb}資料
-	";	
-	echo $main;
+    //取得使用者編號
+    $uid = ($xoopsUser) ? $xoopsUser->getVar('uid') : '';
+    $myts = \MyTextSanitizer::getInstance();
+    $_POST['cate_sn'] = $myts->addSlashes($_POST['cate_sn']);
+    $_POST['mb_com'] = $myts->addSlashes($_POST['mb_com']);
+    $_POST['mb_name'] = $myts->addSlashes($_POST['mb_name']);
+    $_POST['mb_mobile'] = $myts->addSlashes($_POST['mb_mobile']);
+    $_POST['mb_phone'] = $myts->addSlashes($_POST['mb_phone']);
+    $_POST['mb_fax'] = $myts->addSlashes($_POST['mb_fax']);
+    $_POST['mb_email'] = $myts->addSlashes($_POST['mb_email']);
+    $_POST['mb_url'] = $myts->addSlashes($_POST['mb_url']);
+    $_POST['mb_location'] = $myts->addSlashes($_POST['mb_location']);
+    $_POST['mb_memo'] = $myts->addSlashes($_POST['mb_memo']);
+
+    $sql = 'insert into `' . $xoopsDB->prefix('lin_member') . "`
+  (`cate_sn` , `mb_com` , `mb_name` , `mb_mobile` , `mb_phone` , `mb_fax` , `mb_email` , `mb_url` , `mb_location` , `mb_last_update` , `mb_memo`)
+  values('{$_POST['cate_sn']}' , '{$_POST['mb_com']}' , '{$_POST['mb_name']}' , '{$_POST['mb_mobile']}' , '{$_POST['mb_phone']}' , '{$_POST['mb_fax']}' , '{$_POST['mb_email']}' , '{$_POST['mb_url']}' , '{$_POST['mb_location']}' , '" . date('Y-m-d H:i:s', xoops_getUserTimestamp(time())) . "' , '{$_POST['mb_memo']}')";
+ 
+	$xoopsDB->query($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+    $mb_sn = $xoopsDB->getInsertId();
+
+//資料庫的變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
+
+
+//    $_POST['mb_com'] = change_charset($_POST['mb_com'], false);
+
+//    Utility::mk_dir(XOOPS_ROOT_PATH . "/uploads/lin_member/{$_POST['mb_com']}");
+
+    return $mb_sn;
 }
 
-//刪除資料
-function del()
+//更新lin_member某一筆資料
+function update_lin_member($mb_sn = '')
 {
-	$get_mb = $_GET['mb_sn'];
+    global $xoopsDB, $xoopsUser, $xoopsModuleConfig;
+	
+//    $mb = get_lin_member($mb_sn);
+    //取得使用者編號
+//    $uid = ($xoopsUser) ? $xoopsUser->getVar('uid') : '';
+//
+    $myts = \MyTextSanitizer::getInstance();
+	$mb_sn = $myts->addSlashes($_POST['mb_sn']);
+    $_POST['cate_sn'] = $myts->addSlashes($_POST['cate_sn']);
+    $_POST['mb_com'] = $myts->addSlashes($_POST['mb_com']);
+    $_POST['mb_name'] = $myts->addSlashes($_POST['mb_name']);
+    $_POST['mb_mobile'] = $myts->addSlashes($_POST['mb_mobile']);
+    $_POST['mb_phone'] = $myts->addSlashes($_POST['mb_phone']);
+    $_POST['mb_fax'] = $myts->addSlashes($_POST['mb_fax']);
+    $_POST['mb_email'] = $myts->addSlashes($_POST['mb_email']);
+    $_POST['mb_url'] = $myts->addSlashes($_POST['mb_url']);
+    $_POST['mb_location'] = $myts->addSlashes($_POST['mb_location']);
+    $_POST['mb_memo'] = $myts->addSlashes($_POST['mb_memo']);
+//die("值：".$mb_sn."，測試：".$_POST['mb_com']);
 
-	$main="
-		刪除{$get_mb}資料
-	";	
-	echo $main;
+    $sql = 'update `' . $xoopsDB->prefix('lin_member') . "` set
+    `cate_sn` = '{$_POST['cate_sn']}' ,
+    `mb_com` = '{$_POST['mb_com']}' ,
+    `mb_name` = '{$_POST['mb_name']}' ,
+    `mb_mobile` = '{$_POST['mb_mobile']}' ,
+    `mb_phone` = '{$_POST['mb_phone']}' ,
+    `mb_fax` = '{$_POST['mb_fax']}' ,
+    `mb_email` = '{$_POST['mb_email']}' ,
+    `mb_url` = '{$_POST['mb_url']}' ,
+    `mb_location` = '{$_POST['mb_location']}' ,
+    `mb_memo` = '{$_POST['mb_memo']}' ,
+    `mb_last_update` = '" . date('Y-m-d H:i:s', xoops_getUserTimestamp(time())) . "'
+  where `mb_sn` = '$mb_sn'";
+    $xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+	
+
+//    $_POST['mb_com'] = change_charset($_POST['mb_com'], false);
+//    $mb['mb_com'] = change_charset($mb['mb_com'], false);
+
+/*    if (is_dir(XOOPS_ROOT_PATH . "/uploads/lin_member/{$mb['mb_com']}")) {
+        if ($mb['mb_com'] != $_POST['mb_com']) {
+            rename(XOOPS_ROOT_PATH . "/uploads/lin_member/{$mb['mb_com']}", XOOPS_ROOT_PATH . "/uploads/lin_member/{$_POST['mb_com']}");
+        }
+    } else {
+        Utility::mk_dir(XOOPS_ROOT_PATH . "/uploads/lin_member/{$_POST['mb_com']}");
+    }
+*/
+    header("location: {$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}");
+//    return $mb_sn;
+
 }
 
 //列表--顯示預設頁面內容
@@ -72,15 +282,15 @@ function show_content($located)
 		$url_key="";
 	}elseif($url_no == 1){
 		$url_key=" where not`mb_url`= ''";
+//die("是否有來這邊{$url_key}！");
 	}elseif($url_no == 2){
 		$url_key=" where `mb_url`= ''";
 	}else{
 		$url_key="";
 	}
-//die("是否有來這邊{$url_key}！");
 
 	if($get_cate==0 or !empty($and_key)){
-		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$and_key}";
+		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$and_key}{$url_key}";
 	  }elseif($url_no==1 and $get_cate==''){
 		$sql = "select * from ".$xoopsDB->prefix("lin_member")." {$url_key}";
 	  }else{
@@ -92,9 +302,10 @@ function show_content($located)
 
   if($xoopsUser){//管理員使用
 	if($xoopsUser->isAdmin ()){
-	$admin= "
-	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=insert_lin_member'>
+		//新增會員按鈕
+	$add_button= "
+	<div style='float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?op=lin_member_form' class='btn btn-primary'>
 	【新增】
 	</a>
 	</div>
@@ -102,23 +313,14 @@ function show_content($located)
 	</div>
 	
 	";
+		//查詢網站選項
 	$url_button="
-	<div style='border-color:#000; border-style:solid; background-color:{$url_bg0}; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?url_no=0' title=$url_tl>
-	【無查詢】
-	</a>
-	</div>
-	<div style='border-color:#000; border-style:solid; background-color:{$url_bg1}; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?url_no=1' title=$url_tl>
-	【有網站】
-	</a>
-	</div>
-	<div style='border-color:#000; border-style:solid; background-color:{$url_bg2}; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?url_no=2' title=$url_tl>
-	【無網站】
-	</a>
-	</div>
-
+		<select onChange='location.href=\"{$_SERVER['PHP_SELF']}?url_no=\"+this.value'>
+		<option value='' >【網站查詢】</option>
+		<option value='0' >【無查詢】</option> 
+		<option value='1' >【有網站】</option>
+		<option value='2' >【無網站】</option>
+		</select> 
 	";
 	}}
 	
@@ -131,7 +333,7 @@ function show_content($located)
 	</select> 
 	";
 	$search_all="
-	<div id='ugm_member_search'>
+	<div id='member_search'>
 		<form method='get' action='{$form_action}'>
 			<input type='text' name='member_key'  size='10' value='' />
 			<input type='hidden' name='op' value='search' />
@@ -140,7 +342,7 @@ function show_content($located)
 	</div>
 	";
 
-//後台：$located==1；前台：located==2
+//後台：$located==1；前台：$located==2
 //是否可以區分在前後台顯示，$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：9)}
 	$url_locat=1;//<--修改此數值，可控制查詢網站【按鈕】於前後台顯示、隱藏
 	//$data_locat=1;
@@ -150,33 +352,20 @@ function show_content($located)
  	$main.="
 	<table border='0' cellspacing='0' cellpadding='0' >
 	<tr>
-	<td>{$select_cate_sn}</td>
-	<td>
-	";
-//查詢網站判斷
-	if($url_locat==1){//$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：)}
-		if($located==1){$main.="{$url_button}";}
-	}elseif($url_locat==2){
-		if($located==2){$main.="{$url_button}";}
-	}elseif($url_locat==0){
-		if($located==1 or $located==2){$main.="{$url_button}";}
-	}else{
-		if($located==1 and $located==2){$main.="{$url_button}";}
-	}
- 	$main.="
-	{$admin}</td>
+	<td>{$select_cate_sn}".show_locat(1,$located,$url_button)."</td>
+	<td>".show_locat(1,$located,$add_button)."</td>
 	<td align='right'>{$search_all}</td>
 	</tr>
 	</table>
 	<table border='1' cellspacing='0' cellpadding='0' >
 		<tr>
-			<td bgcolor='#ffff00' width=7%>
+			<td bgcolor='#ffff00' width=6%>
 			<center>序號</center>
 			</td>
 			<td bgcolor='#ffff00' width=10%>
 			類別
 			</td>
-			<td bgcolor='#ffff00' width=45%>
+			<td bgcolor='#ffff00' width=46%>
 			名稱
 			</td>
 			<td bgcolor='#ffff00' width=14%>
@@ -202,11 +391,9 @@ function show_content($located)
 			<td bgcolor='#ffff00'>
 			簡介
 			</td>
-		
 		";
 	}
  	$main.="
-
 		</tr>
 	";
     while (false !== ($all = $xoopsDB->fetchArray($result))) {
@@ -232,15 +419,19 @@ function show_content($located)
 	$main.="
 		<tr style='background-color:$color_n;'>
 			<td style='background-color:$color_n;'>
-			<center> $i </center>
+			<center>
+			<a href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'>
+				$i 
+			</a>
+			</center>
 			</td>
 			<td>
 			{$cate_name}
 			</td>
 			<td>
-		<a href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'>
-			{$mb_com}
-		</a>
+			<a href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'>
+				{$mb_com}
+			</a>
 			</td>
 			<td>
 			{$mb_name}
@@ -260,8 +451,6 @@ function show_content($located)
 			</td>
 			<td>{$memo_y}
 			</td>
-		
-		
 		";
 	}
  	$main.="
@@ -276,10 +465,30 @@ function show_content($located)
 echo $main;
 }
 
+//查詢網站判斷
+
+function show_locat($locat,$located,$add_button){
+	
+	if($locat==1){//$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：)}
+		if($located==1){return $add_button;}
+	}elseif($locat==2){
+		if($located==2){return $add_button;}
+//die("測試$add_button");
+	}elseif($locat==0){
+		if($located==1 or $located==2){return $add_button;}
+	}else{
+		if($located==1 and $located==2){return $add_button;}
+	}
+}
+
 //秀出單一個別資料
-function show(){
+function show($located){
 	global $xoopsDB,$xoopsModule,$xoopsUser;
 	$DIRNAME=$xoopsModule->getVar('dirname');
+	
+    $FormValidator = new FormValidator('#myForm', true);
+    $FormValidator->render();
+
 	$mb_sn = $_GET['mb_sn'];
 	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `mb_sn`='$mb_sn'";
 	//以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
@@ -293,49 +502,55 @@ function show(){
 	$mb_memo=nl2br($mb_memo);
 	$cate = get_cate_array();//讀取類別
 	$cate_name = $cate[$cate_sn];
-
-  if($xoopsUser){//管理員使用
-	if($xoopsUser->isAdmin ()){
-	$admin= "
-	<div style='border-color:#FFF; border-style:solid; background-color:#FF5151; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=insert_lin_member'>
-	【新增】
-	</a>
-	</div>
-	<div style='border-color:#FFF; border-style:solid; background-color:#FFAF60; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=update_lin_member&mb_sn={$mb_sn}''>
-	【修改】
-	</a>
-	</div>
-	<div style='border-color:#FFF; border-style:solid; background-color:#1AFD9C; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}''>
+//縮排、載入JS
+	$main =	"
+	<div style='margin:0em 4em; '>
+	<script src='https://unpkg.com/sweetalert/dist/sweetalert.min.js'></script>
+	";
+	//判斷空值，回列表
+	if (empty($mb_com)){
+		show_content($located);
+		return;
+	}
+	//模組路徑 {$xoops_url}
+	if($xoopsUser){//管理員使用
+		if($xoopsUser->isAdmin ()){
+		$admin= "
+		<div style='float:left;'>
+		<a href='/modules/member/admin/main.php?op=lin_member_form' class='btn btn-primary'>【新增】</a>
+		</div>
+		<div style='float:left;'>
+		<a href='/modules/member/admin/main.php?op=lin_member_form&mb_sn={$mb_sn}' class='btn btn-warning'>【編輯】</a>
+		</div>
+		<div style='float:left;'>
+		<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}' class='del_button btn btn-danger'>【刪除】</a>
+		</div>
+		";
+		}}
+/*	<a href='javascript:delete_member_func({$mb_sn})' class='btn btn-danger'>
 	【刪除】
 	</a>
-	</div>
-	";
-	}}
-
-	$main.="
-	{$admin}
-	<div style='border-color:#FFF; border-style:solid; background-color:#FFE66F; border-bottom:1 solid #000000; float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?cate_sn={$cate_sn}'>【列表】</a>
+*/
+	$main.=show_locat(0,$located,$admin)."
+	<div style='float:left;'>
+	<a href='{$_SERVER['PHP_SELF']}?cate_sn={$cate_sn}' class='btn btn-success'>【列表】</a>
 	</div>
 	<div style='background-color:#fff; clear:left;'>
 	</div>
-	<div style='background-color:#000;color:yellow;'>
+	<div style='background-color:#000;color:yellow;' class='btn disabled'>
 		【{$cate_name}】
-		<span style='color:#fff; font-weight:bold;'>{$mb_com}</span>
+		<span style='color:#fff; font-weight:bold;' >{$mb_com}</span>
 	</div>
 	<div style=''>
-	姓名：{$mb_name}<br>
-	行動：{$mb_mobile}<br>
-	電話：{$mb_phone}<br>
-	傳真：{$mb_fax}<br>
-	信箱：<a href='mailto:{$mb_email}'>{$mb_email}</a><br>
-	地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$mb_location}' target=_blank title='連結google地圖'>{$mb_location}</a><br>
-	網址：<a href={$mb_url} target='blank'>{$mb_url}</a>
+	<span class='btn disabled'>姓名：{$mb_name}</span><br>
+	<span class='btn disabled'>行動：{$mb_mobile}</span><br>
+	<span class='btn disabled'>電話：{$mb_phone}</span><br>
+	<span class='btn disabled'>傳真：{$mb_fax}</span><br>
+	<span class='btn disabled'>信箱：<a href='mailto:{$mb_email}'>{$mb_email}</a></span><br>
+	<span class='btn disabled'>地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$mb_location}' target=_blank title='連結google地圖'>{$mb_location}</a></span><br>
+	<span class='btn disabled'>網址：<a href={$mb_url} target='blank'>{$mb_url}</a></span>
 	</div>
-	<div style='background-color:#006000;'>
+	<div style='background-color:#006000;' class='btn btn-success'>
 		<span style='color:#fff; font-weight:bold;'>會員簡介</span>
 	</div>
 	<div><p>{$mb_memo}</p>
@@ -347,9 +562,93 @@ function show(){
 	<div>【作品暫時隱藏】		
 	</div>
 -->	
+	</div>
+	";
+	
+
+//	<--! sweetalert彈出操作框套件JS部分-->
+	$main.="
+	$xoopsurl=XOOPS_URL;
+	<script>var xoopsjsurl='{$xoopsurl}';</script> //傳入Xoops路徑
+	<script>
+	document.getElementById('del_button').addEventListener('click',function(){
+	  swal({
+		title: '您確定要刪除嗎？',
+		icon: 'warning',
+		buttons: {
+		  Btn: false,
+		  cancel: {
+			text: '取消',
+			visible: true
+		  },
+		  confirm: {
+			text: 'Confirm',
+			visible: true
+		  },
+		  danger: {
+			text: 'Danger',
+			visible: true
+		  }
+		}
+	  });
+	});	
+	</script>	
 	";
 	echo $main;
 }
+
+//刪除lin_member某筆資料資料
+function delete_lin_member()
+{
+	global $xoopsDB;
+	$mb_sn = $_GET['mb_sn'];
+//die("<button id='demo1'>Demo {$mb_sn}</button>");
+    if (empty($mb_sn)) {
+        return;
+    }
+	$main = "
+
+	<script>
+	sweetAlert('哎呦……', '出错了！','error');
+	  swal({
+		title: '您確定要刪除嗎？',
+		icon: 'warning',
+		buttons: {
+		  Btn: false,
+		  cancel: {
+			text: '取消',
+			visible: true
+		  },
+		  confirm: {
+			text: 'Confirm',
+			visible: true
+		  },
+		  danger: {
+			text: 'Danger',
+			visible: true
+		  }
+		}
+	  });
+	</script>	
+	";
+	echo $main;
+//	$sql = 'delete from `' . $xoopsDB->prefix('lin_member') . "` where `mb_sn` = '{$mb_sn}'";
+//	$xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+}
+
+//刪除資料
+function del()
+{
+    global $xoopsDB, $isAdmin;
+//	$mb_sn = $_GET['mb_sn'];
+	$apple = "沒有";
+die("值：".$mb_sn);
+//echo "<script> if(confirm( '確認要刪除嗎？')) location.href='$del_mb=$apple' ;else location.href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'; </script>"; 
+echo "<script> var sure=confirm( '确认你的操作吗 '); if (1==sure){location.href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}';} else {alert( '你选择了否 ');}</script>";
+die($del_mb);
+//    delete_lin_member_YesNo($mb_sn, true);
+}
+
 
 //取得類別名稱陣列
 function get_cate_array()
@@ -443,4 +742,30 @@ function SqlFilter($Variable='',$method='text'){
     }
   }
   return  $Variable ;
+}
+
+/*********************UGM自訂函數 **************************/
+###############################################################################
+#  ugm_div($data,$corners)
+#  圓角
+###############################################################################
+function ugm_div($title="",$data="",$corners=""){
+
+  if($corners=="shadow"){
+    $title=empty($title)?"":"<div class='Block1Header'><h1>{$title}</h1></div>";
+    $main="
+      <div class='Block1Border'><div class='Block1BL'><div></div></div><div class='Block1BR'><div></div></div><div class='Block1TL'></div><div class='Block1TR'><div></div></div><div class='Block1T'></div><div class='Block1R'><div></div></div><div class='Block1B'><div></div></div><div class='Block1L'></div><div class='Block1C'></div><div class='Block1'>{$title}
+            <div class='Block1ContentBorder'>{$data}
+            </div>
+        </div></div>
+    ";
+  }else{
+    $main="<div class='BlockBorder'><div class='BlockBL'><div></div></div><div class='BlockBR'><div></div></div><div class='BlockTL'></div><div class='BlockTR'><div></div></div><div class='BlockT'></div><div class='BlockR'><div></div></div><div class='BlockB'><div></div></div><div class='BlockL'></div><div class='BlockC'></div><div class='Block'>\n
+    {$data}\n
+    </div></div>\n";
+   $main=empty($title)? $main:"<span class='title'>{$title}</span>".$main; 
+    
+  }
+  
+  return $main;
 }

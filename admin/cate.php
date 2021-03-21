@@ -1,33 +1,31 @@
 <?php
+use XoopsModules\Tadtools\Utility;
+
 /*-----------引入檔案區--------------*/
 $xoopsOption['template_main'] = "adm_cate.tpl";
 include_once "header.php";
 include_once "../function.php";
+include_once XOOPS_ROOT_PATH . "/modules/tadtools/tad_function.php";//載入tadtools/tad_function.php
 
+//global $cate_sn;
+//$cate_sn = !isset($DBV['cate_sn']) ? '' : $DBV['cate_sn'];
 
 /*-----------function區--------------*/
 //類別列表
 function list_cate(){
-  global $xoopsDB,$xoopsModule,$xoopsConfig;
+  global $xoopsDB,$xoopsModule,$xoopsConfig,$cate_sn;
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	$sql = "select * from ".$xoopsDB->prefix("lin_mb_cate");
 	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
 
-/*	$i=0;  //建立$i值並針對迴圈+1。
+	$i=0;  //建立$i值並針對迴圈+1。
 	//資料
-	$sql = "select * from " . $xoopsDB->prefix('lin_mb_cate') . " order by cate_sn DESC";
-	$result = $xoopsDB -> query($sql) or die($sql) ;
-	while(list($cate_sn,$cate_title) = $xoopsDB -> fetchRow($result)){
-	$honor.="
-	<tr  class='t{$i}'>
-	<td>{$cate_title}</td>
-	<td><a href='{$xoopsurl}/modules/member/admin/honoridsort.php?cate_sn={$cate_sn}'>編輯</a>|<a class='honordle' id='slowdivbotton{$i}' mane='cate_sn={$cate_sn}' href='#no'>刪除</a></td>
-	</tr>
-	";
-	$i++;
-	}
+//	$sql = "select * from " . $xoopsDB->prefix('lin_mb_cate') . " order by cate_sn DESC";
+//	$result = $xoopsDB -> query($sql) or die($sql) ;
+//	while(list($cate_sn,$cate_title) = $xoopsDB -> fetchRow($result)){
+//	$i++;
+//	}
 	//id='slowdivbotton{$i}' 會按照迴圈自動產生 id='slowdivbotton0',id='slowdivbotton1'等按鈕的id值.....  
-*/	
 	
 	$main="
 	<div class='table-responsive'>
@@ -60,6 +58,10 @@ function list_cate(){
 	foreach ($all as $k => $v) {
 		$$k = $v;
 	}
+	$cate_func="
+		<a href='{$xoopsurl}/modules/member/admin/cate.php?op=form_cate&cate_sn={$cate_sn}'>編輯</a>|
+		<a href='{$xoopsurl}/modules/member/admin/cate.php?op=delete_cate&cate_sn={$cate_sn}'>刪除</a>
+	";
 		$main.="
 		<tr>
 			<td>
@@ -91,82 +93,51 @@ function list_cate(){
 
 	//於頁腳或是JS檔中建立以下的sweetalert->code
 	$xoopsurl=XOOPS_URL;
-/*	$main.="
-	<script>var xoopsjsurl='{$xoopsurl}';</script> //傳入Xoops路徑
-	<script>
-		$(document).ready(function(){
-			$(\".honordle\").each(function(index) {   //each所有class='honordle'的元件，並產生index值(0.1.2.3)
-				$(\"#slowdivbotton\"+index+\"\").click(function() {  
-				//#slowdivbotton加上index就會是#slowdivbotton0,#slowdivbotton1,#slowdivbotton2，與PHP檔案中的按鈕ID一致
-				$cate_sn=$(\"#slowdivbotton\"+index+\"\").attr(\"mane\");  //取得#slowdivbotton+index+的mane數值。
-				swal({
-				title: \"您確定要刪除嗎？\",
-				text: \"您確定要刪除這筆資料？\",
-				type: \"warning\",
-				showCancelButton: true,
-				closeOnConfirm: false,
-				confirmButtonText: \"是的，我要刪除\",
-				cancelButtonText: \"取消刪除！\",
-				confirmButtonColor: \"#ec6c62\"
-				},
-
-					function(isConfirm){
-					if (isConfirm) {
-					$.ajax({
-					url: xoopsjsurl+'/modules/ajax/ajax.php',   //ajax引入檔
-					type: 'POST',
-					data: { id: '1',cate_sn: $cate_sn},  //傳入兩個數值到/ajax檔案中
-					}).done(function(data) {
-					swal(\"操作成功!\", \"已成功刪除資料！\", \"success\");
-					getMyArtic();  //更新頁面函示
-					}).error(function(data) {
-					swal(\"OMG\", \"刪除操作失敗了！\", \"error\");
-					});
-					} else {
-					swal(\"取消！\", \"你的資料是安全的:)\",
-					\"error\");
-					}
-						function getMyArtic(){  //刪除元素
-						$(this).click(function() {
-						// location.reload()
-						$t=$(\".t\"+index+\"\");
-						$t.remove();
-						});
-						}
-					});
-				});
-			});
-		});
-	</script>	
-	";
-*/	
 	echo $main;
 }
 
 //編輯單一表單
-function form_cate($cate_sn=0){
+function form_cate(){
   global $xoopsDB,$xoopsModule,$xoopsConfig;
 	$DIRNAME=$xoopsModule->getVar('dirname');
-	$sql = "select * from ".$xoopsDB->prefix("lin_mb_cate")." where `cate_sn`= $cate_sn";
-	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+    include_once(XOOPS_ROOT_PATH."/class/xoopsformloader.php");
+	//套用formValidator驗證機制
+	if(!file_exists(TADTOOLS_PATH."/formValidator.php")){
+	  redirect_header("main.php", 3, _TAD_NEED_TADTOOLS);
+	}
+	include_once TADTOOLS_PATH."/formValidator.php";
+	$formValidator      = new formValidator("#myForm", true);
+	$formValidator_code = $formValidator->render();
 	
-
+	$cate_sn=$_GET['cate_sn'];
+	if (!empty($cate_sn)){
+		$op = 'update_cate';
+		$sql = "select * from ".$xoopsDB->prefix("lin_mb_cate")." where `cate_sn`= $cate_sn";
+		$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+		$all=$xoopsDB->fetchArray($result);
+		foreach($all as $k=>$v){
+		  $$k=$v;
+		}
+	}else{
+		$cate_enable = 1;
+		$op = 'insert_cate';
+	}
+	
 	$main = "
 	<div style='margin:0em 4em; '>
-	<form action='?op=show&cate_sn={$cate_sn}' method='post' id='myForm' enctype='multipart/form-data'>
+	<form action='?op=$op' method='post' id='myForm' enctype='multipart/form-data'>
 		<div style='width:100%; color: #2F0000; font-size:0.5cm; background-color:#FFF8D7; text-shadow: 0.1em 0.1em 0.2em black'><p>
-		名稱：<input type='text' name='cate_title' size='25' value='{$cate_title}' id='cate_title' class='validate[required , min[1], max[100]]'>1<p>
-		排序：<input type='text' name='cate_sort' size='10' value='{$cate_sort}' id='cate_sort' class='validate[required , min[1], max[50]]'>2<p>
-		啟用：<input type='text' name='cate_enable' size='20' value='{$cate_enable}' id='cate_enable' >3<p>
-		備註：<input type='text' name='cate_memo' size='20' value='{$cate_memo}' id='cate_memo' >4<p>
+		類別：<input type='text' name='cate_title' size='25' value='{$cate_title}' id='cate_title' class='validate[required , min[1], max[100]]'><p>
+		排序：<input type='text' name='cate_sort' size='10' value='{$cate_sort}' id='cate_sort' class='validate[required , custom[onlyNumber]]'><p>
+		啟用：<input type='radio' name='cate_enable' value=1 " . Utility::chk($cate_enable, 1, 1) . '>' ."啟用
+		　<input type='radio' name='cate_enable' value=0 " . Utility::chk($cate_enable, 0) . '>' ."隱藏<p>
+		備註：<input type='text' name='cate_memo' size='20' value='{$cate_memo}' id='cate_memo' ><p>
 	<tr><th colspan='2'>
 	<input type='hidden' name='op' value='{$op}'>
 	<input type='hidden' name='uid' value='{$uid}'>
 	<input type='hidden' name='cate_sn' value='{$cate_sn}'>
-	<center>
 		<input class='btn btn-warning' type='submit' value='存檔' />
 		<input class='btn btn-default' type='button' onclick=\"window.location.replace('?op=show&cate_sn={$cate_sn}')\" value='取消' /> 
-	</center>
 	</th></tr>
 	</form>
 	</div>";
@@ -176,10 +147,11 @@ function form_cate($cate_sn=0){
 }
 
 //秀出單一表單
-function show_cate($cate_sn){
+function show_cate(){
 	global $xoopsDB,$xoopsModule,$xoopsUser, $xoopsTpl;
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	
+	$cate_sn=$_GET['cate_sn'];
 	$sql = "select * from ".$xoopsDB->prefix("lin_mb_cate")." where `cate_sn`= $cate_sn";
 	//資料庫的變數： $cate_sn ,$cate_title ,$cate_sort ,$cate_enable ,$cate_memo 
 	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
@@ -190,7 +162,7 @@ function show_cate($cate_sn){
 	  $$k=$v;
 	}
 	//判斷空值，回列表
-	if (empty($cate_com)){
+	if (empty($cate_sn)){
 		list_cate();
 		return;
 	}
@@ -210,7 +182,7 @@ function show_cate($cate_sn){
 		";
 		}}
 
-		
+	echo $admin;	
 }
 
 //以流水號讀取某筆資料
@@ -221,7 +193,6 @@ function get_cate($cate_sn){
 	if (empty($cate_sn)) {
 		return;
 	}
-
 	//cate_title	cate_readme	image_counter
 	$sql = "select * from ".$xoopsDB->prefix("lin_mb_cate")." where `cate_sn` = $cate_sn";
 	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
@@ -232,18 +203,22 @@ function get_cate($cate_sn){
 
 //查詢類別內是否有資料
 function chk_cate($cate_sn){
-  global $xoopsDB,$xoopsModule;
-  $DIRNAME=$xoopsModule->getVar('dirname');
+	global $xoopsDB,$xoopsModule;
+	$DIRNAME=$xoopsModule->getVar('dirname');
 
-  //cate_title	cate_readme	image_counter
-  $sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn` = $cate_sn";
-  $result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
- 
-  
-  //***************************************************************************/
-  $main="";
+	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn` = $cate_sn";
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	$all = $xoopsDB->fetchArray($result);
 
-  return $main ;
+	if(empty($all)){
+//		die("沒有資料，可以刪除");
+		$cate_yn=null;
+		return $cate_yn;
+	}else{
+//		die("內有資料，請勿刪除");
+		$cate_yn="cannot";
+		return $cate_yn;
+	}
 }
 
 
@@ -261,7 +236,7 @@ function insert_cate()
     $_POST['cate_enable'] = $myts->addSlashes($_POST['cate_enable']);
     $_POST['cate_memo'] = $myts->addSlashes($_POST['cate_memo']);
 
-    $sql = 'insert into `' . $xoopsDB->prefix('lin_member') . "`
+    $sql = 'insert into `' . $xoopsDB->prefix('lin_mb_cate') . "`
   (`cate_title` , `cate_sort` , `cate_enable` , `cate_memo`)
   values('{$_POST['cate_title']}' , '{$_POST['cate_sort']}' , 1 , '{$_POST['cate_memo']}')";
  
@@ -300,32 +275,67 @@ function update_cate($cate_sn = '')
     $_POST['cate_memo'] = $myts->addSlashes($_POST['cate_memo']);
 //die("值：".$cate_sn."，測試：".$_POST['cate_title']);
 
-    $sql = 'update `' . $xoopsDB->prefix('lin_member') . "` set
+    $sql = 'update `' . $xoopsDB->prefix('lin_mb_cate') . "` set
     `cate_title` = '{$_POST['cate_title']}' ,
     `cate_sort` = '{$_POST['cate_sort']}' ,
     `cate_enable` = '{$_POST['cate_enable']}' ,
-    `cate_memo` = '{$_POST['cate_memo']}' ,
+    `cate_memo` = '{$_POST['cate_memo']}' 
   where `cate_sn` = '$cate_sn'";
     $xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
 	
 
-//    $_POST['cate_title'] = change_charset($_POST['cate_title'], false);
-//    $mb['cate_title'] = change_charset($mb['cate_title'], false);
-
-/*    if (is_dir(XOOPS_ROOT_PATH . "/uploads/lin_member/{$mb['cate_title']}")) {
-        if ($mb['cate_title'] != $_POST['cate_title']) {
-            rename(XOOPS_ROOT_PATH . "/uploads/lin_member/{$mb['cate_title']}", XOOPS_ROOT_PATH . "/uploads/lin_member/{$_POST['cate_title']}");
-        }
-    } else {
-        Utility::mk_dir(XOOPS_ROOT_PATH . "/uploads/lin_member/{$_POST['cate_title']}");
-    }
-*/
     header("location: {$_SERVER['PHP_SELF']}?op=show&cate_sn={$cate_sn}");
 //    return $cate_sn;
 
 }
 
+//刪除lin_member某筆資料資料
+function delete_cate()
+{
+	global $xoopsDB, $xoopsTpl;
+	$cate_sn = $_GET['cate_sn'];
+    if (empty($cate_sn)) {
+//		die("沒選項");
+        return;
+    }
+$cate_yn=chk_cate($cate_sn);
+    if(!empty($cate_yn)){
+		redirect_header($_SERVER['PHP_SELF'],3,"內有資料，無法刪除");
+		return;
+	}else{
+		$question="
+		<script>
+		if ( confirm ('您確定【刪除】資料嗎？')  )  
+			location.href='cate.php?op=del&cate_sn=$cate_sn';  
+			else location.href='cate.php';
+		</script>
+		";
 
+		$question2="
+		<script>
+		function del_cate(){
+		 var sure = window.confirm('確定要刪除此資料？');
+		 if (!sure) return;
+		 location.href='cate.php?op=del&cate_sn=$cate_sn';
+		}
+		javascript:del_cate();
+		</script>
+		
+		";
+		
+		die($question);
+		//echo $question2;//此行無法執行
+	}
+}
+
+function delete_ing()//此為確定刪除
+{
+	global $xoopsDB;
+	$cate_sn = $_GET['cate_sn'];
+		$sql = 'delete from ' . $xoopsDB->prefix('lin_mb_cate') . " where cate_sn = '{$cate_sn}'";
+		$xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
+		redirect_header($_SERVER['PHP_SELF'],3,"資料已經刪除");
+}
 
 
 /*-----------執行動作判斷區----------*/
@@ -340,21 +350,30 @@ switch ($op) {
     // header("location:{$_SERVER['PHP_SELF']}");
     // exit;
 	
+    case "show_cate"://編輯表單
+        show_cate();
+        break;
+    
     case "form_cate"://編輯表單
         form_cate();
         break;
     
     case "insert_cate"://新增資料
         insert_cate();
+        header("location: {$_SERVER['PHP_SELF']}");
         break;
     
     case "update_cate"://更新資料//修改資料
-        update_cate($cate_sn);
+        update_cate();
         break;
 
-	case "delete"://刪除資料
-        delete_cate($cate_sn);
+	case "delete_cate"://刪除資料
+        delete_cate();
         header("location: {$_SERVER['PHP_SELF']}");
+        break;
+
+	case "del"://刪除資料
+        delete_ing();
         break;
 
     default://列表//

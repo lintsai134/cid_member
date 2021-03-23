@@ -37,60 +37,60 @@ function lin_member_form($mb_sn = '')
     //預設值設定
 
     //設定「mb_sn」欄位預設值
-    $mb_sn = !isset($DBV['mb_sn']) ? $mb_sn : $DBV['mb_sn'];
-    //$xoopsTpl->assign('mb_sn', $mb_sn);
+    $mb_sn = !isset($DBV['mb_sn']) ? '' : $DBV['mb_sn'];
+    $xoopsTpl->assign('mb_sn', $mb_sn);
 
     //設定「cate_sn」欄位預設值
-    $cate_sn = !isset($DBV['cate_sn']) ? $cate_sn : $DBV['cate_sn'];
-    //$xoopsTpl->assign('cate_sn', $cate_sn);
+    $cate_sn = !isset($DBV['cate_sn']) ? '' : $DBV['cate_sn'];
+    $xoopsTpl->assign('cate_sn', $cate_sn);
 
     //設定「mb_com」欄位預設值
-    $mb_com = !isset($DBV['mb_com']) ? $mb_com : $DBV['mb_com'];
-    //$xoopsTpl->assign('mb_com', $mb_com);
+    $mb_com = !isset($DBV['mb_com']) ? '' : $DBV['mb_com'];
+    $xoopsTpl->assign('mb_com', $mb_com);
 
     //設定「mb_name」欄位預設值
-    $mb_name = !isset($DBV['mb_name']) ? $mb_name : $DBV['mb_name'];
-    //$xoopsTpl->assign('mb_name', $mb_name);
+    $mb_name = !isset($DBV['mb_name']) ? '' : $DBV['mb_name'];
+    $xoopsTpl->assign('mb_name', $mb_name);
 
     //設定「mb_mobile」欄位預設值
-    $mb_mobile = !isset($DBV['mb_mobile']) ? $mb_mobile : $DBV['mb_mobile'];
-    //$xoopsTpl->assign('mb_mobile', $mb_mobile);
+    $mb_mobile = !isset($DBV['mb_mobile']) ? '' : $DBV['mb_mobile'];
+    $xoopsTpl->assign('mb_mobile', $mb_mobile);
 
     //設定「mb_phone」欄位預設值
-    $mb_phone = !isset($DBV['mb_phone']) ? $mb_phone : $DBV['mb_phone'];
-    //$xoopsTpl->assign('mb_phone', $mb_phone);
+    $mb_phone = !isset($DBV['mb_phone']) ? '' : $DBV['mb_phone'];
+    $xoopsTpl->assign('mb_phone', $mb_phone);
 
     //設定「mb_fax」欄位預設值
-    $mb_fax = !isset($DBV['mb_fax']) ? $mb_fax : $DBV['mb_fax'];
-    //$xoopsTpl->assign('mb_fax', $mb_fax);
+    $mb_fax = !isset($DBV['mb_fax']) ? '' : $DBV['mb_fax'];
+    $xoopsTpl->assign('mb_fax', $mb_fax);
 
     //設定「mb_email」欄位預設值
-    $mb_email = !isset($DBV['mb_email']) ? $mb_email : $DBV['mb_email'];
-    //$xoopsTpl->assign('mb_email', $mb_email);
+    $mb_email = !isset($DBV['mb_email']) ? '' : $DBV['mb_email'];
+    $xoopsTpl->assign('mb_email', $mb_email);
 
     //設定「mb_url」欄位預設值
-    $mb_url = !isset($DBV['mb_url']) ? $mb_url : $DBV['mb_url'];
-    //$xoopsTpl->assign('mb_url', $mb_url);
+    $mb_url = !isset($DBV['mb_url']) ? '' : $DBV['mb_url'];
+    $xoopsTpl->assign('mb_url', $mb_url);
 
     //設定「mb_location」欄位預設值
-    $mb_location = !isset($DBV['mb_location']) ? $mb_location : $DBV['mb_location'];
-    //$xoopsTpl->assign('mb_location', $mb_location);
+    $mb_location = !isset($DBV['mb_location']) ? '' : $DBV['mb_location'];
+    $xoopsTpl->assign('mb_location', $mb_location);
 
     //設定「uid」欄位預設值
     $user_uid = ($xoopsUser) ? $xoopsUser->uid() : '';
-    $uid = (!isset($DBV['uid'])) ? $user_uid : $DBV['uid'];
-    //$xoopsTpl->assign('mb_uid', $mb_uid);
+    $uid = (!isset($DBV['uid'])) ? '' : $DBV['uid'];
+    $xoopsTpl->assign('mb_uid', $mb_uid);
 
     //設定「mb_last_update」欄位預設值
     $mb_last_update = !isset($DBV['mb_last_update']) ? date('Y-m-d H:i:s') : $DBV['mb_last_update'];
-    //$xoopsTpl->assign('mb_last_update', $mb_last_update);
+    $xoopsTpl->assign('mb_last_update', $mb_last_update);
 
     //設定「mb_memo」欄位預設值
-    $mb_memo = !isset($DBV['mb_memo']) ? $mb_memo : $DBV['mb_memo'];
-    //$xoopsTpl->assign('mb_memo', $mb_memo);
+    $mb_memo = !isset($DBV['mb_memo']) ? '' : $DBV['mb_memo'];
+    $xoopsTpl->assign('mb_memo', $mb_memo);
 
     $op = (empty($mb_sn)) ? 'insert_lin_member' : 'update_lin_member';
-    //$op="replace_lin_member";
+//    $op="lin_member_form";
 
 /*	$FormValidator = new FormValidator('#myForm', true);
 	$FormValidator->render();
@@ -111,11 +111,11 @@ function lin_member_form($mb_sn = '')
 	</select> 
 	";
 	if(empty($mb_sn)){
-		$Form_title="<div class='btn btn-success disabled btn-block'>【新增會員資料】</div>";
+		$Form_title="【新增會員資料】";
 	}else{
-		$Form_title="<div class='btn btn-success disabled btn-block'>【編輯會員資料】</div>";
+		$Form_title="【編輯會員資料】";
 	}
-
+/*
 	$main = "
 	<div style='margin:0em 4em; '>
 	<form action='?op=show&mb_sn={$mb_sn}' method='post' id='myForm' enctype='multipart/form-data'>
@@ -146,12 +146,26 @@ function lin_member_form($mb_sn = '')
 	</th></tr>
 	</form>
 	</div>";
-		
+*/		
 //以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
 
+    $xoopsTpl->assign('select_cate_sn', $select_cate_sn);
+    $xoopsTpl->assign('Form_title', $Form_title);
+    $xoopsTpl->assign('mb_sn', $mb_sn);
+    $xoopsTpl->assign('mb_com', $mb_com);
+    $xoopsTpl->assign('mb_name', $mb_name);
+    $xoopsTpl->assign('mb_mobile', $mb_mobile);
+    $xoopsTpl->assign('mb_phone', $mb_phone);
+    $xoopsTpl->assign('mb_fax', $mb_fax);
+    $xoopsTpl->assign('mb_email', $mb_email);
+    $xoopsTpl->assign('mb_location', $mb_location);
+    $xoopsTpl->assign('mb_url', $mb_url);
+    $xoopsTpl->assign('op', 'lin_member_form');
+    $xoopsTpl->assign('uid', $uid);
+
 //	$main=ugm_div($Form_title,$main,"shadow");
-//die("值：".$mb_sn."，姓名：".$mb_name);
-	echo $main;
+//die("值：".$mb_sn."，姓名：".$mb_name."，op：".$op);
+//	echo $main;
 }
 
 //新增資料到lin_member中
@@ -250,7 +264,6 @@ function update_lin_member($mb_sn = '')
 function show_content($located)
 {
     global $xoopsDB, $xoopsTpl, $isAdmin,$xoopsModule,$isAdminMember,$xoopsModuleConfig,$xoopsUser;
-	
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	$and_key="";
 	$get_cate = $_GET['cate_sn'];
@@ -357,7 +370,8 @@ function show_content($located)
 	<td align='right'>{$search_all}</td>
 	</tr>
 	</table>
-	<table border='1' cellspacing='0' cellpadding='0' >
+	<div class='table-responsive'>
+	<table border='1' cellspacing='0' cellpadding='0' class='table'>
 		<tr>
 			<td bgcolor='#ffff00' width=6%>
 			<center>序號</center>
@@ -459,10 +473,10 @@ function show_content($located)
 		$i++;
 	}
 	$main.="
-	</table>";
+	</table>
+	</div>";
 	
-//    $xoopsTpl->assign('content', $main);
-echo $main;
+    $xoopsTpl->assign('content', $main);
 }
 
 //查詢網站判斷
@@ -483,12 +497,13 @@ function show_locat($locat,$located,$add_button){
 
 //秀出單一個別資料
 function show($located){
-	global $xoopsDB,$xoopsModule,$xoopsUser;
+	global $xoopsDB,$xoopsModule,$xoopsUser, $xoopsTpl;
 	$DIRNAME=$xoopsModule->getVar('dirname');
 	
     $FormValidator = new FormValidator('#myForm', true);
     $FormValidator->render();
 
+	$op="show";
 	$mb_sn = $_GET['mb_sn'];
 	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `mb_sn`='$mb_sn'";
 	//以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
@@ -502,16 +517,16 @@ function show($located){
 	$mb_memo=nl2br($mb_memo);
 	$cate = get_cate_array();//讀取類別
 	$cate_name = $cate[$cate_sn];
-//縮排、載入JS
-	$main =	"
-	<div style='margin:0em 4em; '>
-	<script src='https://unpkg.com/sweetalert/dist/sweetalert.min.js'></script>
-	";
+
+	//縮排、載入JS
+//	<--! sweetalert彈出操作框套件JS部分-->
+
 	//判斷空值，回列表
 	if (empty($mb_com)){
 		show_content($located);
 		return;
 	}
+	
 	//模組路徑 {$xoops_url}
 	if($xoopsUser){//管理員使用
 		if($xoopsUser->isAdmin ()){
@@ -523,77 +538,29 @@ function show($located){
 		<a href='/modules/member/admin/main.php?op=lin_member_form&mb_sn={$mb_sn}' class='btn btn-warning'>【編輯】</a>
 		</div>
 		<div style='float:left;'>
-		<a href='javascript:delete_action({$mb_sn})' class='btn btn-danger btn-xs'>【刪除】</a>
+		<a href='javascript:delete_action({$mb_sn});' class='btn btn-danger'>【刪除】</a>
 		</div>
 		";
 		}}
-/*	<a href='javascript:delete_member_func({$mb_sn})' class='btn btn-danger'>
-	<a href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}' class='del_button btn btn-danger'>
-	【刪除】
-	</a>
-	<a href="javascript:delete_action({$action.action_id})" class="btn btn-danger btn-xs">刪除</a>
+    $show_locat=show_locat(0,$located,$admin);//第一個項目，$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：其他數字)}
 	
-*/
-	$main.=show_locat(0,$located,$admin)."
-	<div style='float:left;'>
-	<a href='{$_SERVER['PHP_SELF']}?cate_sn={$cate_sn}' class='btn btn-success'>【列表】</a>
-	</div>
-	<div style='background-color:#fff; clear:left;'>
-	</div>
-	<div style='background-color:#000;color:yellow;' class='btn disabled'>
-		【{$cate_name}】
-		<span style='color:#fff; font-weight:bold;' >{$mb_com}</span>
-	</div>
-	<div style=''>
-	<span class='btn disabled'>姓名：{$mb_name}</span><br>
-	<span class='btn disabled'>行動：{$mb_mobile}</span><br>
-	<span class='btn disabled'>電話：{$mb_phone}</span><br>
-	<span class='btn disabled'>傳真：{$mb_fax}</span><br>
-	<span class='btn disabled'>信箱：<a href='mailto:{$mb_email}'>{$mb_email}</a></span><br>
-	<span class='btn disabled'>地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$mb_location}' target=_blank title='連結google地圖'>{$mb_location}</a></span><br>
-	<span class='btn disabled'>網址：<a href={$mb_url} target='blank'>{$mb_url}</a></span>
-	</div>
-	<div style='background-color:#006000;' class='btn btn-success'>
-		<span style='color:#fff; font-weight:bold;'>會員簡介</span>
-	</div>
-	<div><p>{$mb_memo}</p>
-	</div>
-<!--先隱藏
-	<div style='background-color:#2F0000;'>
-		<span style='color:#fff; font-weight:bold;'>作品簡介</span>
-	</div>
-	<div>【作品暫時隱藏】		
-	</div>
--->	
-	</div>
-	";
+    $xoopsTpl->assign('cate_sn', $cate_sn);
+    $xoopsTpl->assign('cate_name', $cate_name);
+    $xoopsTpl->assign('mb_sn', $mb_sn);
+    $xoopsTpl->assign('mb_com', $mb_com);
+    $xoopsTpl->assign('mb_name', $mb_name);
+    $xoopsTpl->assign('mb_mobile', $mb_mobile);
+    $xoopsTpl->assign('mb_phone', $mb_phone);
+    $xoopsTpl->assign('mb_fax', $mb_fax);
+    $xoopsTpl->assign('mb_email', $mb_email);
+    $xoopsTpl->assign('mb_location', $mb_location);
+    $xoopsTpl->assign('mb_url', $mb_url);
+    $xoopsTpl->assign('show_locat', $show_locat);
+    $xoopsTpl->assign('mb_memo', $mb_memo);
+    $xoopsTpl->assign('op', $op);
+    $xoopsTpl->assign('isAdmin', $isAdmin);
 	
-
-//	<--! sweetalert彈出操作框套件JS部分-->
-	$main.="
-	<script type='text/javascript' src='class/sweet-alert/sweetalert.min.js'></script>
-	<link rel='stylesheet' type='text/css' href='class/sweet-alert/sweetalert.css' />
-	<script type='text/javascript'>
-	  function delete_action(id){
-		swal({
-		  title: '確定要刪除嗎？',
-		  text: '刪除後資料就消失救不回來囉！',
-		  type: 'warning',
-		  showCancelButton: true,
-		  confirmButtonColor: '#DD6B55',
-		  confirmButtonText: '是！含淚刪除！',
-		  cancelButtonText: '不...別刪',
-		  closeOnConfirm: false
-		}, function(){
-		  swal('OK！刪掉惹！', '該資料已經隨風而逝了...', 'success');
-
-		  location.href='{$_SERVER['PHP_SELF']}?op=delete&mb_sn={$mb_sn}';
-		});
-	  }
-	</script>
-
-	";
-	echo $main;
+//    $xoopsTpl->assign('', $);
 }
 
 //刪除lin_member某筆資料資料
@@ -605,27 +572,10 @@ function delete_lin_member()
         return;
     }
 //die("<button id='demo1'>Demo {$mb_sn}</button>");
-	$main = "
-	$sql = 'delete from `' . $xoopsDB->prefix('lin_member') . "` where `mb_sn` = '{$mb_sn}'";
+	$sql = 'delete from ' . $xoopsDB->prefix('lin_member') . " where mb_sn = '{$mb_sn}'";
 	$xoopsDB->queryF($sql) or Utility::web_error($sql, __FILE__, __LINE__);
 
-	";
-	echo $main;
 }
-
-//刪除資料
-function del()
-{
-    global $xoopsDB, $isAdmin;
-//	$mb_sn = $_GET['mb_sn'];
-	$apple = "沒有";
-die("值：".$mb_sn);
-//echo "<script> if(confirm( '確認要刪除嗎？')) location.href='$del_mb=$apple' ;else location.href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}'; </script>"; 
-echo "<script> var sure=confirm( '确认你的操作吗 '); if (1==sure){location.href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}';} else {alert( '你选择了否 ');}</script>";
-die($del_mb);
-//    delete_lin_member_YesNo($mb_sn, true);
-}
-
 
 //取得類別名稱陣列
 function get_cate_array()

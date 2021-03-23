@@ -42,4 +42,5 @@ switch ($op) {
 }
 
 /*-----------秀出結果區--------------*/
+
 include_once 'footer.php';

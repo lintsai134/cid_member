@@ -41,6 +41,7 @@ $modversion['system_menu'] = 1;
 $modversion['hasAdmin']   = 1;
 $modversion['adminindex'] = 'admin/index.php';
 $modversion['adminmenu']  = 'admin/menu.php';
+$modversion['admincate']  = 'admin/cate.php';
 
 //---前台主選單設定---//
 $modversion['hasMain'] = 1;

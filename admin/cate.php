@@ -298,7 +298,7 @@ function delete_cate()
 //		die("沒選項");
         return;
     }
-$cate_yn=chk_cate($cate_sn);
+	$cate_yn=chk_cate($cate_sn);//查詢類別內是否有資料
     if(!empty($cate_yn)){
 		redirect_header($_SERVER['PHP_SELF'],3,"內有資料，無法刪除");
 		return;

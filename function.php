@@ -621,7 +621,7 @@ function show_content($located)
 	$search_all="
 	<div id='member_search'>
 		<form method='get' action='{$form_action}'>
-			<input type='text' name='member_key'  size='10' value='' />
+			<input type='text' name='member_key'  size='6' value='' />
 			<input type='hidden' name='op' value='search' />
 			<input type='submit' value='會員搜尋' />
 		</form>

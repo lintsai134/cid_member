@@ -90,7 +90,6 @@ function lin_member_form($mb_sn = '')
     $xoopsTpl->assign('mb_memo', $mb_memo);
 
     $op = (empty($mb_sn)) ? 'insert_lin_member' : 'update_lin_member';
-//    $op="lin_member_form";
 
 /*	$FormValidator = new FormValidator('#myForm', true);
 	$FormValidator->render();
@@ -115,12 +114,12 @@ function lin_member_form($mb_sn = '')
 	}else{
 		$Form_title="【編輯會員資料】";
 	}
-/*
+
 	$main = "
 	<div style='margin:0em 4em; '>
 	<form action='?op=show&mb_sn={$mb_sn}' method='post' id='myForm' enctype='multipart/form-data'>
 		<div style='width:100%; color: #2F0000; font-size:0.5cm; background-color:#FFF8D7; text-shadow: 0.1em 0.1em 0.2em black'>
-		$Form_title<p>
+		<div class='btn btn-success disabled btn-block'>$Form_title</div><p>
 		$select_cate_sn<p>
 		名稱：<input type='text' name='mb_com' size='25' value='{$mb_com}' id='mb_com' class='validate[required , min[1], max[100]]'><p>
 		姓名：<input type='text' name='mb_name' size='10' value='{$mb_name}' id='mb_name' class='validate[required , min[1], max[50]]'><p>
@@ -130,9 +129,9 @@ function lin_member_form($mb_sn = '')
 		信箱：<input type='text' name='mb_email' size='25' value='{$mb_email}' id='mb_email' ><p>
 		地址：<input type='text' name='mb_location' size='25' value='{$mb_location}' id='mb_location' ><p>
 		網址：<input type='text' name='mb_url' size='25' value='{$mb_url}' id='mb_url' '><p>
-		<div class='btn btn-success disabled btn-block'>會員簡介</div>
+		<div class='btn btn-info disabled btn-block'>會員簡介</div>
 		<div >
-		<textarea name='mb_memo' style='width:100%;height:300px; font-size:0.5cm;' id='mb_memo'>{$mb_memo}</textarea>
+		<textarea name='mb_memo' style='width:100%;height:200px; font-size:0.5cm;' id='mb_memo'>{$mb_memo}</textarea>
 		</div>
 		</div>
 	<tr><th colspan='2'>
@@ -146,9 +145,9 @@ function lin_member_form($mb_sn = '')
 	</th></tr>
 	</form>
 	</div>";
-*/		
+		
 //以下會產生這些變數： $mb_sn ,$cate_sn ,$mb_com ,$mb_name ,$mb_mobile ,$mb_phone ,$mb_fax ,$mb_email ,$mb_url ,$mb_location ,$mb_last_update ,$mb_memo 
-
+/*資料不傳過去模組樣板
     $xoopsTpl->assign('select_cate_sn', $select_cate_sn);
     $xoopsTpl->assign('Form_title', $Form_title);
     $xoopsTpl->assign('mb_sn', $mb_sn);
@@ -162,10 +161,10 @@ function lin_member_form($mb_sn = '')
     $xoopsTpl->assign('mb_url', $mb_url);
     $xoopsTpl->assign('op', 'lin_member_form');
     $xoopsTpl->assign('uid', $uid);
-
+*/
 //	$main=ugm_div($Form_title,$main,"shadow");
 //die("值：".$mb_sn."，姓名：".$mb_name."，op：".$op);
-//	echo $main;
+	echo $main;
 }
 
 //新增資料到lin_member中
@@ -258,6 +257,280 @@ function update_lin_member($mb_sn = '')
     header("location: {$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}");
 //    return $mb_sn;
 
+}
+
+//列表--區塊使用
+function show_blocks_test()
+{
+    global $xoopsDB, $xoopsTpl, $isAdmin,$xoopsModule,$isAdminMember,$xoopsModuleConfig,$xoopsUser;
+	$get_cate = $_GET['cate_sn'];
+	if($get_cate==1){
+		$bg_color='1, 6, 88, 1';
+	}elseif($get_cate==2){
+		$bg_color='16, 88, 8, 1';
+	}elseif($get_cate==3){
+		$bg_color='86, 1, 6, 8';
+	}else{
+	}
+	$main = "
+<script src='https://libs.baidu.com/jquery/1.10.2/jquery.min.js'></script>
+<style>
+
+</style>
+<div class='gundong'>
+    <ul>
+	";	
+	
+	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn`= '$get_cate'";
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	$nums=$xoopsDB->getRowsNum($result);//目前執行結果的資料數量
+    while (false !== ($all = $xoopsDB->fetchArray($result))) {
+		foreach ($all as $k => $v) {
+			$$k = $v;
+		}
+		$name_t=$mb_com."－".$mb_name;//要顯示的文字
+		if(mb_strlen($name_t)>12){
+			$name_t=mb_substr( $name_t,0,11,"utf-8")."...";
+		}
+		$main.="
+		<li>
+		<a target='_parent' href='/modules/member/index.php?op=show&mb_sn={$mb_sn}' >
+		<div style='border-width: 1px ; text-align:left; height: 40px ; padding: 0px; background-color: rgba($bg_color) ;border-radius: 4px;'>
+		<span style ='color:rgb(255, 255, 255);'>
+		{$name_t}</ span></ div>
+		</a><p>
+		</li>
+		";
+	}
+	$main.="
+        </ul>
+</div>
+<script>
+
+</script>
+	";
+echo $main;	
+		
+}
+
+//列表--區塊使用
+function show_blocks()
+{
+    global $xoopsDB, $xoopsTpl, $isAdmin,$xoopsModule,$isAdminMember,$xoopsModuleConfig,$xoopsUser;
+	$get_cate = $_GET['cate_sn'];
+	if($get_cate==1){
+		$bg_color='1, 6, 88, 1';
+	}elseif($get_cate==2){
+		$bg_color='16, 88, 8, 1';
+	}elseif($get_cate==3){
+		$bg_color='86, 1, 6, 8';
+	}else{
+	}
+	$main = "
+<script src='https://libs.baidu.com/jquery/1.10.2/jquery.min.js'></script>
+<style>
+* {
+	margin:0;
+	padding:0;
+}
+html,body {
+	height:100%;
+	overflow:hidden;
+}
+#con-countDown {
+	color:#fff;
+	font-size:0.64rem;
+}
+#con-countDown span {
+	display:inline-block;
+	margin-right:0.1rem;
+}
+.gundong {
+	height:200px;
+	overflow:hidden;
+	width:220px;
+	margin: 0 auto;
+	position:relative;
+}
+.gundong ul {
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+}
+.gundong li {
+	height:50px;
+	line-height:40px;
+	color:#ccc;
+	font-size:18px;
+}
+.gundong li.active {
+	color:#fff
+}
+</style>
+<div class='gundong'>
+    <ul>
+	";	
+	
+	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn`= '$get_cate'";
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	$nums=$xoopsDB->getRowsNum($result);//目前執行結果的資料數量
+    while (false !== ($all = $xoopsDB->fetchArray($result))) {
+		foreach ($all as $k => $v) {
+			$$k = $v;
+		}
+		$name_t=$mb_com."－".$mb_name;//要顯示的文字
+		if(mb_strlen($name_t)>12){
+			$name_t=mb_substr( $name_t,0,11,"utf-8")."...";
+		}
+		$main.="
+		<li>
+		<a target='_parent' href='/modules/member/index.php?op=show&mb_sn={$mb_sn}' >
+		<div style='border-width: 1px ; text-align:left; height: 40px ; padding: 0px; background-color: rgba($bg_color) ;border-radius: 4px;'>
+		<span style ='color:rgb(255, 255, 255);'>
+		{$name_t}</ span></ div>
+		</a><p>
+		</li>
+		";
+	}
+	$main.="
+        </ul>
+</div>
+<script>
+	function shipei() {
+	 //适配
+	 if (innerWidth > 1920) {
+		 document.documentElement.style.fontSize = '100px';
+	 } else {
+		 document.documentElement.style.fontSize = 100 * (innerWidth / 1920) + 'px';
+	 }
+	 if (innerWidth < 751) {
+		 document.documentElement.style.fontSize = 100 * (innerWidth / 750) + 'px';
+	 }
+	};
+	 shipei();
+
+	// JavaScript Document
+	var liHeiight = $('.gundong li').height();
+	var num = $('.gundong li').size()
+	if (num < 6) {
+	 $('.gundong').css({
+		 'height': liHeiight * (num - 1)
+	 });
+	};
+
+	function gundong(val) {
+	 var clone = $('.gundong li').first().clone();
+	 $('.gundong ul').append(clone);
+	 $('.gundong li').removeClass('active');
+	 $('.gundong ul').stop().animate({
+		 top: -liHeiight
+	 }, 800, function() {
+		 $('.gundong ul').css({
+			 top: 0
+		 });
+		 $('.gundong li').eq(0).remove();
+		 $('.gundong li').eq(0).addClass('active');
+	 })
+	};
+	var t = setInterval(function() {
+	 gundong();
+	}, 2000);
+</script>
+	";
+echo $main;	
+		
+}
+
+//列表--區塊使用
+function show_blocks_old()
+{
+    global $xoopsDB, $xoopsTpl, $isAdmin,$xoopsModule,$isAdminMember,$xoopsModuleConfig,$xoopsUser;
+	$get_cate = $_GET['cate_sn'];
+	if($get_cate==1){
+		$bg_color='1, 6, 88, 1';
+	}elseif($get_cate==2){
+		$bg_color='16, 88, 8, 1';
+	}elseif($get_cate==3){
+		$bg_color='86, 1, 6, 8';
+	}else{
+	}
+	$main = "
+	<!doctype html>
+	<html>
+	<head>
+	<meta charset='utf-8'>
+	<title>純Css文字輪播輪播-jq22.com</title>
+	</head>
+	<body>
+	<div class='div1'>
+		<div class='div2'>
+	";	
+	
+	$sql = "select * from ".$xoopsDB->prefix("lin_member")." where `cate_sn`= '$get_cate'";
+	$result = $xoopsDB->query($sql) or redirect_header($_SERVER['PHP_SELF'],3, mysql_error());
+	$nums=$xoopsDB->getRowsNum($result);//目前執行結果的資料數量
+	$h_nums=$nums*60;
+	$i=1;
+    while (false !== ($all = $xoopsDB->fetchArray($result))) {
+		foreach ($all as $k => $v) {
+			$$k = $v;
+		}
+		
+		$word_o = mb_strlen($mb_com)+mb_strlen($mb_name);//列表長度
+		if($word_o < 10){
+			$height_no = '20px';
+		}elseif($word_o > 18){
+			$height_no = '60px';
+		}else{
+			$height_no = '40px';
+		}
+		$main.="
+		<P>
+		<center>$i / $nums
+		<a target='_parent' href='/modules/member/index.php?op=show&mb_sn={$mb_sn}' >
+		<div style='border-width: 1px ; width: 150px; text-align:left; height: $height_no ; padding: 0px; background-color: rgba($bg_color) ;border-radius: 4px;'>
+		<span style ='color:rgb(255, 255, 255);'>
+		{$mb_com}</ span>-{$mb_name}</ div>
+		</a><br>
+		</P>
+		";
+		$i++;
+	}
+	$main.="
+			</div>
+	</div>
+
+	<script src='http://libs.baidu.com/jquery/1.11.3/jquery.min.js'></script>
+	<style>
+	.div1 {
+		width:200px;
+		height:".$h_nums."px;
+		overflow:hidden;
+		margin:auto;
+		position:relative;
+	}
+	@keyframes anis {
+		100% {
+		transform:translateY(-500px)
+	}
+	}img {
+		position:absolute;
+	}
+	.div2 {
+		animation:anis 10s linear infinite;
+	}
+	.div2:hover {
+		animation-play-state:paused;
+	}
+	</style>
+
+	</body>
+	</html>	
+
+	";
+echo $main;	
+		
 }
 
 //列表--顯示預設頁面內容
@@ -475,8 +748,9 @@ function show_content($located)
 	$main.="
 	</table>
 	</div>";
-	
-    $xoopsTpl->assign('content', $main);
+
+echo $main;
+//    $xoopsTpl->assign('content', $main);
 }
 
 //查詢網站判斷
@@ -538,12 +812,12 @@ function show($located){
 		<a href='/modules/member/admin/main.php?op=lin_member_form&mb_sn={$mb_sn}' class='btn btn-warning'>【編輯】</a>
 		</div>
 		<div style='float:left;'>
-		<a href='javascript:delete_action({$mb_sn});' class='btn btn-danger'>【刪除】</a>
+		<a href='/modules/member/admin/main.php?op=delete&mb_sn={$mb_sn}' class='btn btn-danger'>【刪除】</a>
 		</div>
 		";
 		}}
     $show_locat=show_locat(0,$located,$admin);//第一個項目，$locat==(僅後台：1)；{(僅前台：2)；(全顯：0)；(隱藏：其他數字)}
-	
+/*	
     $xoopsTpl->assign('cate_sn', $cate_sn);
     $xoopsTpl->assign('cate_name', $cate_name);
     $xoopsTpl->assign('mb_sn', $mb_sn);
@@ -559,12 +833,74 @@ function show($located){
     $xoopsTpl->assign('mb_memo', $mb_memo);
     $xoopsTpl->assign('op', $op);
     $xoopsTpl->assign('isAdmin', $isAdmin);
-	
 //    $xoopsTpl->assign('', $);
+*/	
+	$main ="
+		{$show_locat}
+		<div style='float:left;'>
+		<a href='?cate_sn={$cate_sn}' class='btn btn-success'>【列表】</a>
+		</div>
+		<div style='background-color:#fff; clear:left;'>
+		</div>
+		<div style='background-color:#000;color:yellow;' class='disabled'>
+			【{$cate_name}】
+			<span style='color:#fff; font-size:0.5cm; font-weight:bold;' class='disabled' >{$mb_com}</span>
+		</div><p>
+		<div class='btn-default'>
+		<span class='disabled'>姓名：{$mb_name}</span><p><p>
+		";
+		if(!empty($mb_mobile)){
+			$main.="<span class='disabled'>行動：{$mb_mobile}</span><p>";
+		}
+		if(!empty($mb_phone)){
+			$main.="<span class='disabled'>電話：{$mb_phone}</span><p>";
+		}
+		if(!empty($mb_fax)){
+			$main.="<span class='disabled'>傳真：{$mb_fax}</span><p>";
+		}
+		if(!empty($mb_email)){
+			$main.="<span class='disabled'>信箱：<a href='mailto:{$mb_email}'>{$mb_email}</a></span><p>";
+		}
+		if(!empty($mb_location)){
+			$main.="<span class='disabled'>地址：<a href='http://maps.google.com.tw/maps?f=q&hl=zh-TW&geocode=&q={$mb_location}' target=_blank title='連結google地圖'>{$mb_location}</a></span><p>";
+		}
+		if(!empty($mb_url)){
+			$main.="<span class='disabled'>網址：<a href='{$mb_url}' target='blank'>{$mb_url}</a></span>";
+		}
+	$main.="</div>";
+		if(!empty($mb_memo)){
+			$main.="<div style='background-color:#006000;' class='btn-success'>
+				<span style='color:#fff; font-weight:bold;'>會員簡介</span>
+			</div>
+			<div style='background-color:#F3F3FA;'><p>{$mb_memo}</p>
+			</div>";
+		}
+	echo $main;
 }
 
 //刪除lin_member某筆資料資料
 function delete_lin_member()
+{
+	global $xoopsDB, $xoopsTpl;
+	$mb_sn = $_GET['mb_sn'];
+    if (empty($mb_sn)) {
+//		die("沒選項");
+        return;
+    }
+		$question="
+		<script>
+		if ( confirm ('您確定【刪除】資料嗎？')  )  
+			location.href='main.php?op=deling&mb_sn=$mb_sn';  
+			else location.href='{$_SERVER['PHP_SELF']}?op=show&mb_sn={$mb_sn}';
+		</script>
+		";
+		
+		die($question);
+		//echo $question;//此行無法執行
+}
+
+//確定刪除lin_member某筆資料資料
+function deleteing_lin_member()
 {
 	global $xoopsDB;
 	$mb_sn = $_GET['mb_sn'];

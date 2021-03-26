@@ -1,4 +1,4 @@
-OP=【<{$op}>】
+
 <{include file='sweet-alert.tpl'}>
 	<script type='text/javascript' src='class/sweet-alert/sweetalert.min.js'></script>
 	<link rel='stylesheet' type='text/css' href='class/sweet-alert/sweetalert.css' />

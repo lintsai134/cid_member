@@ -29,10 +29,14 @@ switch ($op) {
     
 	case "delete"://刪除資料--(程式在function.php)
         delete_lin_member();
+        break;
+
+	case "deling"://確定刪除資料
+        deleteing_lin_member();
         header("location: {$_SERVER['PHP_SELF']}");
         break;
 
-    case "show"://秀出結果區--(程式在function.php)
+		case "show"://秀出結果區--(程式在function.php)
         show($located=1);
         break;
 

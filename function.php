@@ -646,19 +646,19 @@ function show_content($located)
 	<div class='table-responsive'>
 	<table border='1' cellspacing='0' cellpadding='0' class='table'>
 		<tr>
-			<td bgcolor='#ffff00' width=6%>
+			<td bgcolor='#ffff00' width=8%>
 			<center>序號</center>
 			</td>
 			<td bgcolor='#ffff00' width=10%>
 			類別
 			</td>
-			<td bgcolor='#ffff00' width=46%>
+			<td bgcolor='#ffff00' width=42%>
 			名稱
 			</td>
 			<td bgcolor='#ffff00' width=14%>
 			姓名
 			</td>
-			<td bgcolor='#ffff00' width=14%>
+			<td bgcolor='#ffff00' width=16%>
 			電話
 			</td>";
 	if($located==1){//如果是後台才執行，前台為2
@@ -842,11 +842,11 @@ function show($located){
 		</div>
 		<div style='background-color:#fff; clear:left;'>
 		</div>
-		<div style='background-color:#000;color:yellow;' class='disabled'>
+		<div style='border-width: 1px ; text-align:left; line-height: 30px ; padding: 0px; background-color: #000; color:yellow ;border-radius: 4px;'>
 			【{$cate_name}】
 			<span style='color:#fff; font-size:0.5cm; font-weight:bold;' class='disabled' >{$mb_com}</span>
 		</div><p>
-		<div class='btn-default'>
+		<div style='border-width: 1px; border-color:#800; text-align:left; border-radius: 5px; margin:0em 1em;'>
 		<span class='disabled'>姓名：{$mb_name}</span><p><p>
 		";
 		if(!empty($mb_mobile)){
@@ -869,10 +869,11 @@ function show($located){
 		}
 	$main.="</div>";
 		if(!empty($mb_memo)){
-			$main.="<div style='background-color:#006000;' class='btn-success'>
-				<span style='color:#fff; font-weight:bold;'>會員簡介</span>
+			$main.="
+			<div style='border-width: 1px ; line-height: 30px ; padding: 0px; background-color: #006000;border-radius: 4px;'>
+				<span style='color:#fff; font-weight:bold;font-size:0.5cm;margin:0em 1em;'>會員簡介</span>
 			</div>
-			<div style='background-color:#F3F3FA;'><p>{$mb_memo}</p>
+			<div style='background-color:#F3F3FA;margin:0em 1em;border-radius: 10px;'><p>{$mb_memo}</p>
 			</div>";
 		}
 	echo $main;
